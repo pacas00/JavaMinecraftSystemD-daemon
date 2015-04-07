@@ -1,0 +1,76 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+		maven {
+            name = "HTB3"
+            url = "http://htb2.petercashel.net:81"
+        }
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'net.petercashel.JMSDd'
+version = '0.0.1-SNAPSHOT'
+archivesBaseName = 'JMSDd-daemon'
+buildDir = 'target'
+
+
+dependencies {
+    compile "io.netty:netty-all:5.0.0.Alpha2"
+    runtime "io.netty:netty-all:5.0.0.Alpha2"
+	compile "net.petercashel.JMSDd:JMSDd-Common:0.0.1-SNAPSHOT"
+    runtime "net.petercashel.JMSDd:JMSDd-Common:0.0.1-SNAPSHOT"
+}
+
+uploadArchives {
+    repositories {
+		mavenDeployer {
+            repository(url: 'file:///home/maven/public')
+			// This is just the pom data for the maven repo
+                pom {
+                    groupId = project.group
+                    version = project.version
+                    artifactId = project.archivesBaseName
+                    project {
+                        name project.archivesBaseName
+                        packaging 'jar'
+                        description 'JavaMinecraftSystemD-daemon'
+                        url 'https://github.com/pacas00/JavaMinecraftSystemD-daemon'
+
+                        scm {
+                            url 'https://github.com/pacas00/JavaMinecraftSystemD-daemon'
+                            connection 'scm:git:git://github.com/pacas00/JavaMinecraftSystemD-daemon.git'
+                            developerConnection 'scm:git:git@github.com:pacas00/JavaMinecraftSystemD-daemon.git'
+                        }
+
+                        issueManagement {
+                            system 'github'
+                            url 'https://github.com/pacas00/JavaMinecraftSystemD-daemon/issues'
+                        }
+
+                        licenses {
+                            license {
+                                name 'Creative daemons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'
+                                url 'http://creativedaemons.org/licenses/by-nd/4.0/'
+                                distribution 'repo'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id 'pacas00'
+                                name 'Peter Cashel'
+                                roles { role 'developer' }
+                            }
+                        }
+                    }
+                }
+        }
+    }
+}
