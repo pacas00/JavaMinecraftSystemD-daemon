@@ -36,15 +36,29 @@ repositories {
 
 dependencies {
     compile "io.netty:netty-all:5.0.0.Alpha2"
-    runtime "io.netty:netty-all:5.0.0.Alpha2"
 	compile "net.petercashel.JMSDd:JMSDd-Common:0.0.1-SNAPSHOT"
-    runtime "net.petercashel.JMSDd:JMSDd-Common:0.0.1-SNAPSHOT"
 	compile "com.google.code.gson:gson:2.3.1"
     compile "net.java.dev.jna:jna:4.1.0"
 	compile "net.java.dev.jna:jna-platform:4.1.0"
-	runtime "com.google.code.gson:gson:2.3.1"
-    runtime "net.java.dev.jna:jna:4.1.0"
-	runtime "net.java.dev.jna:jna-platform:4.1.0"
+}
+
+// Include dependent libraries in archive.
+mainClassName = "net.petercashel.jmsDd.daemonMain"
+
+jar {
+	classifier = 'thin'
+    manifest { 
+    attributes "Main-Class": "net.petercashel.jmsDc.clientMain"
+  }  
+}
+
+task fatJar(type: Jar) {
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+artifacts {
+	archives fatJar
 }
 
 uploadArchives {
