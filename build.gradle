@@ -42,13 +42,10 @@ dependencies {
 	compile "net.java.dev.jna:jna-platform:4.1.0"
 }
 
-// Include dependent libraries in archive.
-mainClassName = "net.petercashel.jmsDd.daemonMain"
-
 jar {
 	classifier = 'thin'
     manifest { 
-    attributes "Main-Class": "net.petercashel.jmsDc.clientMain"
+    attributes "Main-Class": "net.petercashel.jmsDd.daemonMain"
   }  
 }
 
