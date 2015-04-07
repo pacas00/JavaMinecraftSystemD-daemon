@@ -43,8 +43,6 @@ public class Configuration {
 		try {
 			byte[] encoded = Files.readAllBytes(new File(configDir, "config.json").toPath());
 			content = new String(encoded, StandardCharsets.US_ASCII);
-			System.out.println(content);
-			
 			JsonElement jelement = new JsonParser().parse(content);
 		    cfg = jelement.getAsJsonObject();
 		} catch (IOException e) {
@@ -127,7 +125,7 @@ public class Configuration {
 			return e.getAsJsonObject(name);
 		}
 	}
-	public static void init() {
+	public static void configInit() {
 		loadConfig();
 		
 		getJSONObject(cfg, "daemonSettings");
@@ -135,6 +133,11 @@ public class Configuration {
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", true);
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", true);
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
+		getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings");
+		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true);
+		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalPath", (new File(configDir, "SSLCERT.p12").toPath().toString()));
+		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalSecret", "secret");
+		
 		getJSONObject(cfg, "processSettings");
 		getDefault(getJSONObject(cfg, "processSettings"), "processExcecutable", "");
 		getDefault(getJSONObject(cfg, "processSettings"), "processWorkingDirectory", "");

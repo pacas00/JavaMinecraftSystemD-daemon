@@ -34,6 +34,8 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.jmsDd.command.commandServer;
 import net.petercashel.nettyCore.server.serverCore;
+import net.petercashel.nettyCore.ssl.SSLContextProvider;
+import static net.petercashel.jmsDd.Configuration.*;
 
 public class daemonMain {
 
@@ -43,26 +45,36 @@ public class daemonMain {
 	private static int pid = 0;
 
 	public static void main(String[] args) {
-		Configuration.init();
+		configInit();
 		//init commands
 		commandServer.init();
 		System.out.println(System.getProperty("user.home"));
 
-		//init server
-		threadManager.getInstance().addRunnable(new Runnable() {
-			@Override
-			public void run() {
-				while(daemonMain.run) {
-					try {
-						serverCore.initializeServer(14444);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+		//Do SSL Config Settings
+		serverCore.UseSSL = getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
+		
+		if (getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true)) {
+			SSLContextProvider.useExternalSSL = true;
+			SSLContextProvider.pathToSSLCert = getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalPath", (new File(configDir, "SSLCERT.p12").toPath().toString()));
+			SSLContextProvider.SSLCertSecret = getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalSecret", "secret");
+		}
+
+		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", true)) {
+			//init server
+			threadManager.getInstance().addRunnable(new Runnable() {
+				@Override
+				public void run() {
+					while(daemonMain.run) {
+						try {
+							serverCore.initializeServer(getDefault(getJSONObject(cfg, "daemonSettings"), "serverPort", 14444));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
-			}
-		});
-
+			});
+		}
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -74,18 +86,26 @@ public class daemonMain {
 
 
 		//init minecraft instance
+		if (getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart", true))
 		RunProcess();
+		
 		pHasStopCmd = Configuration.getDefault(Configuration.getJSONObject(Configuration.cfg, "processSettings"), "processHasShutdownCommand", false);
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
-				daemonMain.ShutdownProcess();
+				try {
+					ShutdownProcess();
+				} catch (NullPointerException n) {
+				}
 			}
 		}));
 	}
 
 	public static void shutdown() {
 		run = false;
-		ShutdownProcess();
+		try {
+			ShutdownProcess();
+		} catch (NullPointerException n) {
+		}
 		serverCore.shutdown();
 		threadManager.getInstance().shutdown();
 		// TODO Auto-generated method stub
@@ -93,7 +113,7 @@ public class daemonMain {
 
 
 		//shutdown other
-
+		saveConfig();
 	}
 
 	public static void RestartProcess() {
@@ -101,13 +121,16 @@ public class daemonMain {
 			p.exitValue();
 			RunProcess();
 		} catch (IllegalThreadStateException e) {
-			ShutdownProcess();
+			try {
+				ShutdownProcess();
+			} catch (NullPointerException n) {
+			}
 		} catch (NullPointerException e) {
 			RunProcess();
 		}
 	}
 
-	public static void ShutdownProcess() {
+	public static void ShutdownProcess() throws NullPointerException{
 		if (pHasStopCmd) {
 			String s = Configuration.getDefault(Configuration.getJSONObject(Configuration.cfg, "processSettings"), "processShutdownCommand", "") + System.lineSeparator();
 			try {
