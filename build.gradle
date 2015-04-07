@@ -62,8 +62,8 @@ uploadArchives {
 
                         licenses {
                             license {
-                                name 'Creative daemons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)'
-                                url 'http://creativedaemons.org/licenses/by-nd/4.0/'
+                                name 'Apache Software License, version 2.0'
+                                url 'http://www.apache.org/licenses/LICENSE-2.0'
                                 distribution 'repo'
                             }
                         }
