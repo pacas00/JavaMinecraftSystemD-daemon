@@ -15,6 +15,8 @@
  *******************************************************************************/
 package net.petercashel.jmsDd;
 
+import static net.petercashel.jmsDd.Configuration.configDir;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -35,6 +37,7 @@ import com.google.gson.JsonParser;
 public class Configuration {
 	static File configDir = new File(System.getProperty("user.home") + File.separator + ".JMSDd" + File.separator);
 	public static JsonObject cfg = null;
+	private static boolean newConfig = false;
 
 	public static void loadConfig() {
 		configDir.mkdirs();
@@ -49,6 +52,7 @@ public class Configuration {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			cfg = new JsonObject();
+			newConfig  = true;
 		}
 	}
 
@@ -130,8 +134,9 @@ public class Configuration {
 		
 		getJSONObject(cfg, "daemonSettings");
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPort", 14444);
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", true);
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false);
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", true);
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLISocketPath", new File("/tmp/.JMSDd/", "JMSDd.sock").toPath().toString());
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
 		getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings");
 		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true);
@@ -149,5 +154,12 @@ public class Configuration {
 		getJSONObject(cfg, "webSettings");
 		getDefault(getJSONObject(cfg, "webSettings"), "webAPIEnable", true);
 		saveConfig();
+		
+		if (newConfig ) {
+			System.out.println("Configuration Generated. Config is located at");
+			System.out.println(new File(configDir, "config.json").toPath());
+			
+			System.exit(0);
+		}
 	}
 }

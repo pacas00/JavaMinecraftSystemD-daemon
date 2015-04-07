@@ -32,8 +32,10 @@ import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 
 import net.petercashel.commonlib.threading.threadManager;
+import net.petercashel.commonlib.util.OS_Util;
 import net.petercashel.jmsDd.command.commandServer;
 import net.petercashel.nettyCore.server.serverCore;
+import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
 import net.petercashel.nettyCore.ssl.SSLContextProvider;
 import static net.petercashel.jmsDd.Configuration.*;
 
@@ -46,6 +48,22 @@ public class daemonMain {
 
 	public static void main(String[] args) {
 		configInit();
+		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", false) == false && getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false) == false) {
+			System.err.println("The daemon requires that either serverCLIEnable or serverPortEnable is enabled");
+			System.err.println("Please correct your configuration");
+			System.err.println(new File(configDir, "config.json").toPath());
+			
+			System.exit(1);
+			
+		}
+		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", false) == true && OS_Util.isWinNT()) {
+			System.err.println("Socket based CLI connections do not function on the Windows Platform.");
+			System.err.println("Please correct your configuration by disabling serverCLIEnable");
+			System.err.println(new File(configDir, "config.json").toPath());
+			
+			System.exit(1);
+			
+		}
 		//init commands
 		commandServer.init();
 		System.out.println(System.getProperty("user.home"));
@@ -59,7 +77,24 @@ public class daemonMain {
 			SSLContextProvider.SSLCertSecret = getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalSecret", "secret");
 		}
 
-		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", true)) {
+		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", true)) {
+			//init server
+			threadManager.getInstance().addRunnable(new Runnable() {
+				@Override
+				public void run() {
+					while(daemonMain.run) {
+						try {
+							serverCoreUDS.initializeServer(new File((getJSONObject(cfg, "daemonSettings").get("serverCLISocketPath")).getAsString()).toPath());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+		}
+		
+		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false)) {
 			//init server
 			threadManager.getInstance().addRunnable(new Runnable() {
 				@Override
@@ -107,6 +142,7 @@ public class daemonMain {
 		} catch (NullPointerException n) {
 		}
 		serverCore.shutdown();
+		serverCoreUDS.shutdown();
 		threadManager.getInstance().shutdown();
 		// TODO Auto-generated method stub
 
