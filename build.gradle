@@ -16,7 +16,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'net.petercashel.JMSDd'
-version = '0.3.0'
+version = '0.4.0-SNAPSHOT'
 archivesBaseName = 'JMSDd-daemon'
 buildDir = 'target'
 
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compile "io.netty:netty-all:5.0.0.Alpha2"
-	compile "net.petercashel.JMSDd:JMSDd-Common:0.3.0"
+	compile "net.petercashel.JMSDd:JMSDd-Common:0.4.0-SNAPSHOT"
 	compile "com.google.code.gson:gson:2.3.1"
     compile "net.java.dev.jna:jna:4.1.0"
 	compile "net.java.dev.jna:jna-platform:4.1.0"
