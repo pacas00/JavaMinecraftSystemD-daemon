@@ -33,6 +33,7 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.commonlib.util.OS_Util;
+import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commandServer;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
@@ -48,6 +49,7 @@ public class daemonMain {
 
 	public static void main(String[] args) {
 		configInit();
+		PrintStreamHandler.run();
 		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", false) == false && getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false) == false) {
 			System.err.println("The daemon requires that either serverCLIEnable or serverPortEnable is enabled");
 			System.err.println("Please correct your configuration");
@@ -65,11 +67,13 @@ public class daemonMain {
 			
 		}
 		//init commands
+		AuthSystem.init();
 		commandServer.init();
 		System.out.println(System.getProperty("user.home"));
 
 		//Do SSL Config Settings
 		serverCore.UseSSL = getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
+		serverCore.DoAuth = getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable", true);
 		
 		if (getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true)) {
 			SSLContextProvider.useExternalSSL = true;
@@ -181,7 +185,7 @@ public class daemonMain {
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-				p.destroy();
+				//p.destroy();
 			};
 		} else {
 			p.destroy(); //TODO find away to send CTRL+C in java

@@ -15,27 +15,19 @@
  *******************************************************************************/
 package net.petercashel.jmsDd;
 
-import static net.petercashel.jmsDd.Configuration.configDir;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Configuration {
-	static File configDir = new File(System.getProperty("user.home") + File.separator + ".JMSDd" + File.separator);
+	public static File configDir = new File(System.getProperty("user.home") + File.separator + ".JMSDd" + File.separator);
 	public static JsonObject cfg = null;
 	private static boolean newConfig = false;
 
@@ -151,6 +143,7 @@ public class Configuration {
 		getDefault(getJSONObject(cfg, "processSettings"), "processShutdownCommand", "");
 		getJSONObject(cfg, "authSettings");
 		getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable", true);
+		getDefault(getJSONObject(cfg, "authSettings"), "authenticationSystem", "JsonDataSystem");
 		getJSONObject(cfg, "webSettings");
 		getDefault(getJSONObject(cfg, "webSettings"), "webAPIEnable", true);
 		saveConfig();

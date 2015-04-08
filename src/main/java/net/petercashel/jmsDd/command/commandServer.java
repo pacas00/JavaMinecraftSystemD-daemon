@@ -16,6 +16,7 @@
 package net.petercashel.jmsDd.command;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,6 +37,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -50,11 +53,14 @@ public class commandServer{
 
 	static HashMap<String,Class<? extends ICommand>> map = new HashMap<String,Class<? extends ICommand>>();
 
+	public static int historylimit = 80;
+	public static final LinkedBlockingQueue<String> history = new LinkedBlockingQueue<String>(historylimit + 5);
 	public static OutputStream Progin = null;
 	
 	static PipedOutputStream pipeout = new PipedOutputStream();
 	static PipedInputStream pipein = null;
 	public static PrintStream out = null;
+
 	
 	public static void init() {
 		registerCommands();
@@ -73,10 +79,14 @@ public class commandServer{
 		threadManager.getInstance().addRunnable(new Runnable() {
 			@Override
 			public void run() {
+				Scanner sc = null;
 				while(daemonMain.run) {
-					Scanner sc = new Scanner((pipein));
+					sc = new Scanner((pipein));
 					while (sc.hasNextLine()) {
 						String s = sc.nextLine();
+						//Add to queue here
+						history.offer(s);
+						if (history.size() > historylimit ) history.poll();
 						byte[] b = null;
 						try {
 							b = s.getBytes("ASCII");
@@ -91,10 +101,33 @@ public class commandServer{
 					}
 
 				}
+				sc.close();
 			}
 		});
 	}
 	
+	public static void sendHistory(ChannelHandlerContext ctx) {
+		if (history.size() > 0) {
+			Object[] str = null;
+			str = history.toArray();
+			for (Object o : str) {
+			try {
+				String s = (String) o;
+				byte[] b = null;
+				try {
+					b = s.getBytes("ASCII");
+				} catch (UnsupportedEncodingException e) {
+					b = s.getBytes();
+				}
+				if (b.length > 0) {
+						(PacketRegistry.pack(new IOOutPacket(b.length, b))).sendPacket(ctx);	
+				}
+			} catch (Exception e) {
+			}
+			}
+	}
+		
+	}
 	
 	public static void registerCommand(Class<? extends ICommand> com) {
 		try {
