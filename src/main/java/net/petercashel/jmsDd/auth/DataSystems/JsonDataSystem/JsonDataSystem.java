@@ -1,3 +1,4 @@
+
 package net.petercashel.jmsDd.auth.DataSystems.JsonDataSystem;
 
 import java.io.File;
@@ -13,14 +14,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import net.petercashel.commonlib.random.HexCodeGenerator;
 import net.petercashel.jmsDd.Configuration;
 import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem;
@@ -28,14 +27,15 @@ import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem;
 public class JsonDataSystem implements IAuthDataSystem {
 
 	protected static HashMap<String, UserData> userList = new HashMap<String, UserData>();
-	
+
 	@Override
 	public void init() {
 		load();
 		if (userList.isEmpty()) {
 			try {
 				AddUser("admin");
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -80,14 +80,17 @@ public class JsonDataSystem implements IAuthDataSystem {
 			fop.flush();
 			fop.close();
 
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			try {
 				if (fop != null) {
 					fop.close();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -98,22 +101,24 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 		String content = "";
 		try {
-			content = readFile(new File(Configuration.configDir, "userConfig.json").toPath().toString(), StandardCharsets.US_ASCII);
-		} catch (IOException e) {
+			content = readFile(new File(Configuration.configDir, "userConfig.json").toPath().toString(),
+					StandardCharsets.US_ASCII);
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
 		JsonElement jelement = new JsonParser().parse(content);
-	    //JsonObject  jobject = jelement.getAsJsonObject();
-	    JsonArray jarray = jelement.getAsJsonArray();
-	    
+		// JsonObject jobject = jelement.getAsJsonObject();
+		JsonArray jarray = jelement.getAsJsonArray();
+
 		Iterator<JsonElement> iterator = jarray.iterator();
 		while (iterator.hasNext()) {
 			JsonElement e = iterator.next();
 			JsonObject s = e.getAsJsonObject();
-			Gson gson = new GsonBuilder().create(); 
+			Gson gson = new GsonBuilder().create();
 			UserData r = gson.fromJson(s, UserData.class);
-			userList.put(r.Username,r);
+			userList.put(r.Username, r);
 		}
 
 	}
@@ -168,7 +173,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-512");
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		String text = userList.get(user).Token + userList.get(user).TokenSalt;
@@ -177,12 +183,12 @@ public class JsonDataSystem implements IAuthDataSystem {
 		byte[] hash = md.digest();
 		StringBuffer hexString = new StringBuffer();
 
-        for (int i = 0; i < hash.length; i++) {
-            String hex = Integer.toHexString(0xff & hash[i]);
-            if(hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-        
+		for (int i = 0; i < hash.length; i++) {
+			String hex = Integer.toHexString(0xff & hash[i]);
+			if (hex.length() == 1) hexString.append('0');
+			hexString.append(hex);
+		}
+
 		return hexString.toString();
 	}
 
@@ -190,17 +196,18 @@ public class JsonDataSystem implements IAuthDataSystem {
 	public void ResetToken(String user) {
 		String text = HexCodeGenerator.Generate(user, 128);
 		UserData d = userList.get(user);
-        d.Token = text;
-        userList.put(d.Username, d);
+		d.Token = text;
+		userList.put(d.Username, d);
 		ResetTokenSalt(user);
 	}
-	
+
 	@Override
 	public void ResetTokenSalt(String user) {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-512");
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		String text = HexCodeGenerator.Generate(user + userList.get(user).Token, 64);
@@ -209,18 +216,18 @@ public class JsonDataSystem implements IAuthDataSystem {
 		byte[] hash = md.digest();
 		StringBuffer hexString = new StringBuffer();
 
-        for (int i = 0; i < hash.length; i++) {
-            String hex = Integer.toHexString(0xff & hash[i]);
-            if(hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
+		for (int i = 0; i < hash.length; i++) {
+			String hex = Integer.toHexString(0xff & hash[i]);
+			if (hex.length() == 1) hexString.append('0');
+			hexString.append(hex);
+		}
 
-        UserData d = userList.get(user);
-        d.TokenSalt = hexString.toString();
-        userList.put(d.Username, d);
-        
+		UserData d = userList.get(user);
+		d.TokenSalt = hexString.toString();
+		userList.put(d.Username, d);
+
 	}
-	
+
 	public static String readFile(String path, Charset encoding) throws IOException {
 
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
