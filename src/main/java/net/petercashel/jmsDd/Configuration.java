@@ -15,11 +15,16 @@
  *******************************************************************************/
 package net.petercashel.jmsDd;
 
+import static net.petercashel.jmsDd.Configuration.cfg;
+import static net.petercashel.jmsDd.Configuration.getDefault;
+import static net.petercashel.jmsDd.Configuration.getJSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -128,7 +133,7 @@ public class Configuration {
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPort", 14444);
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false);
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", true);
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLISocketPath", new File("/tmp/.JMSDd/", "JMSDd.sock").toPath().toString());
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLISocketPath", new File("/tmp", "JMSDd.sock").toPath().toString());
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
 		getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings");
 		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true);
@@ -141,6 +146,7 @@ public class Configuration {
 		getDefault(getJSONObject(cfg, "processSettings"), "processArguments", "");
 		getDefault(getJSONObject(cfg, "processSettings"), "processHasShutdownCommand", false);
 		getDefault(getJSONObject(cfg, "processSettings"), "processShutdownCommand", "");
+		getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart", true);
 		getJSONObject(cfg, "authSettings");
 		getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable", true);
 		getDefault(getJSONObject(cfg, "authSettings"), "authenticationSystem", "JsonDataSystem");
