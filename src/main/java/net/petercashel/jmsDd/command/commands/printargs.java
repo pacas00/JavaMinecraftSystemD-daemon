@@ -27,7 +27,8 @@ public class printargs implements ICommand {
 	@Override
 	public boolean processCommand(String[] args) {
 		commandServer.out.println("Printing Args.");
-		if (args.length == 0) {} else if (args.length == 1) {
+		if (args.length == 0) {
+		} else if (args.length == 1) {
 			commandServer.out.print(args[0]);
 		} else {
 			int i = 0;

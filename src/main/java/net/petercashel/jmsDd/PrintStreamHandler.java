@@ -1,4 +1,3 @@
-
 package net.petercashel.jmsDd;
 
 import java.io.File;
@@ -32,14 +31,12 @@ public class PrintStreamHandler {
 		logfile.delete();
 		try {
 			logfile.createNewFile();
-		}
-		catch (IOException e1) {
+		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		try {
 			logger = new PrintStream(new FileOutputStream(logfile, true));
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		WrappedSystemOut = new PrintStreamWrapper(SystemOut, "[OUT]");
@@ -69,7 +66,8 @@ public class PrintStreamHandler {
 			prefix = pfix;
 		}
 
-		public PrintStreamWrapper(PrintStream out, boolean autoFlush, String pfix) {
+		public PrintStreamWrapper(PrintStream out, boolean autoFlush,
+				String pfix) {
 			super(out, autoFlush);
 			outputStream = out;
 			prefix = pfix;
@@ -79,8 +77,9 @@ public class PrintStreamHandler {
 			synchronized (this) {
 				outputStream.println(x);
 				outputStream.flush();
-				logger.print("[ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) + " ] " + prefix
-						+ " ");
+				logger.print("[ "
+						+ (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+								.format(new Date())) + " ] " + prefix + " ");
 				logger.println(x);
 			}
 		}
@@ -94,7 +93,9 @@ public class PrintStreamHandler {
 		public void print(String s) {
 			outputStream.print(s);
 			outputStream.flush();
-			logger.print("[ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) + " ] " + prefix + " ");
+			logger.print("[ "
+					+ (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+							.format(new Date())) + " ] " + prefix + " ");
 			logger.print(s);
 			logger.println();
 		}

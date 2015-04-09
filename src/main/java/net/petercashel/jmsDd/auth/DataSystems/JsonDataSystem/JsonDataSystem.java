@@ -1,4 +1,3 @@
-
 package net.petercashel.jmsDd.auth.DataSystems.JsonDataSystem;
 
 import java.io.File;
@@ -34,8 +33,7 @@ public class JsonDataSystem implements IAuthDataSystem {
 		if (userList.isEmpty()) {
 			try {
 				AddUser("admin");
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -51,7 +49,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 		while (iterator.hasNext()) {
 			Gson gson = new GsonBuilder().create();
 			UserData p = iterator.next();
-			jsonRoot.add(new JsonParser().parse(gson.toJson(p, UserData.class)).getAsJsonObject());
+			jsonRoot.add(new JsonParser().parse(gson.toJson(p, UserData.class))
+					.getAsJsonObject());
 		}
 
 		// Use GSON to pretty up my JSON.Simple
@@ -80,17 +79,14 @@ public class JsonDataSystem implements IAuthDataSystem {
 			fop.flush();
 			fop.close();
 
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			try {
 				if (fop != null) {
 					fop.close();
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -101,10 +97,10 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 		String content = "";
 		try {
-			content = readFile(new File(Configuration.configDir, "userConfig.json").toPath().toString(),
+			content = readFile(new File(Configuration.configDir,
+					"userConfig.json").toPath().toString(),
 					StandardCharsets.US_ASCII);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
@@ -131,7 +127,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 	@Override
 	public void AddUser(String user) throws Exception {
-		if (userList.containsKey(user)) throw new Exception("User Already Exists");
+		if (userList.containsKey(user))
+			throw new Exception("User Already Exists");
 		UserData d = new UserData();
 		d.Username = user;
 		userList.put(user, d);
@@ -140,7 +137,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 	@Override
 	public void AddUser(String user, String token) throws Exception {
-		if (userList.containsKey(user)) throw new Exception("User Already Exists");
+		if (userList.containsKey(user))
+			throw new Exception("User Already Exists");
 		UserData d = new UserData();
 		d.Username = user;
 		d.Token = token;
@@ -173,8 +171,7 @@ public class JsonDataSystem implements IAuthDataSystem {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-512");
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		String text = userList.get(user).Token + userList.get(user).TokenSalt;
@@ -185,7 +182,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 		for (int i = 0; i < hash.length; i++) {
 			String hex = Integer.toHexString(0xff & hash[i]);
-			if (hex.length() == 1) hexString.append('0');
+			if (hex.length() == 1)
+				hexString.append('0');
 			hexString.append(hex);
 		}
 
@@ -206,11 +204,11 @@ public class JsonDataSystem implements IAuthDataSystem {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-512");
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-		String text = HexCodeGenerator.Generate(user + userList.get(user).Token, 64);
+		String text = HexCodeGenerator.Generate(
+				user + userList.get(user).Token, 64);
 
 		md.update(text.getBytes(StandardCharsets.UTF_8));
 		byte[] hash = md.digest();
@@ -218,7 +216,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 		for (int i = 0; i < hash.length; i++) {
 			String hex = Integer.toHexString(0xff & hash[i]);
-			if (hex.length() == 1) hexString.append('0');
+			if (hex.length() == 1)
+				hexString.append('0');
 			hexString.append(hex);
 		}
 
@@ -228,7 +227,8 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 	}
 
-	public static String readFile(String path, Charset encoding) throws IOException {
+	public static String readFile(String path, Charset encoding)
+			throws IOException {
 
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);

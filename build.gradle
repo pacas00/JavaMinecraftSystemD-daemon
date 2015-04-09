@@ -37,6 +37,7 @@ repositories {
 dependencies {
     compile "io.netty:netty-all:5.0.0.Alpha2"
 	compile "net.petercashel.JMSDd:JMSDd-Common:0.4.0-SNAPSHOT"
+	compile "net.petercashel.JMSDd:JMSDd-client:0.4.0-SNAPSHOT"
 	compile "com.google.code.gson:gson:2.3.1"
     compile "net.java.dev.jna:jna:4.1.0"
 	compile "net.java.dev.jna:jna-platform:4.1.0"
@@ -52,6 +53,9 @@ jar {
 task fatJar(type: Jar) {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
+	manifest { 
+    attributes "Main-Class": "net.petercashel.jmsDd.daemonMain"
+  } 
 }
 
 artifacts {

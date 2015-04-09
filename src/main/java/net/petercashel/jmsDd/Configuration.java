@@ -28,8 +28,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Configuration {
-	public static File configDir = new File(System.getProperty("user.home") + File.separator + ".JMSDd"
-			+ File.separator);
+	public static File configDir = new File(System.getProperty("user.home")
+			+ File.separator + ".JMSDd" + File.separator);
 	public static JsonObject cfg = null;
 	private static boolean newConfig = false;
 
@@ -38,12 +38,12 @@ public class Configuration {
 		String content = "";
 		new File("config" + File.separator).mkdir();
 		try {
-			byte[] encoded = Files.readAllBytes(new File(configDir, "config.json").toPath());
+			byte[] encoded = Files.readAllBytes(new File(configDir,
+					"config.json").toPath());
 			content = new String(encoded, StandardCharsets.US_ASCII);
 			JsonElement jelement = new JsonParser().parse(content);
 			cfg = jelement.getAsJsonObject();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			cfg = new JsonObject();
@@ -65,21 +65,19 @@ public class Configuration {
 				file.createNewFile();
 			}
 			// get the content in bytes
-			byte[] contentInBytes = jsonString.getBytes(StandardCharsets.US_ASCII);
+			byte[] contentInBytes = jsonString
+					.getBytes(StandardCharsets.US_ASCII);
 			fop.write(contentInBytes);
 			fop.flush();
 			fop.close();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			try {
 				if (fop != null) {
 					fop.close();
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -120,7 +118,8 @@ public class Configuration {
 	}
 
 	public static JsonObject getJSONObject(JsonObject e, String name) {
-		if (e.has(name)) return e.getAsJsonObject(name);
+		if (e.has(name))
+			return e.getAsJsonObject(name);
 		else {
 			JsonObject j = new JsonObject();
 			e.add(name, j);
@@ -133,27 +132,44 @@ public class Configuration {
 
 		getJSONObject(cfg, "daemonSettings");
 		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPort", 14444);
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable", false);
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable", true);
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLISocketPath", new File("/tmp", "JMSDd.sock").toPath()
-				.toString());
-		getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable", true);
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverPortEnable",
+				false);
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable",
+				true);
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLISocketPath",
+				new File("/tmp", "JMSDd.sock").toPath().toString());
+		getDefault(getJSONObject(cfg, "daemonSettings"), "serverSSLEnable",
+				true);
 		getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings");
-		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_UseExternal", true);
-		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalPath", (new File(
-				configDir, "SSLCERT.p12").toPath().toString()));
-		getDefault(getJSONObject(getJSONObject(cfg, "daemonSettings"), "SSLSettings"), "SSL_ExternalSecret", "secret");
+		getDefault(
+				getJSONObject(getJSONObject(cfg, "daemonSettings"),
+						"SSLSettings"), "SSL_UseExternal", true);
+		getDefault(
+				getJSONObject(getJSONObject(cfg, "daemonSettings"),
+						"SSLSettings"), "SSL_ExternalPath", (new File(
+						configDir, "SSLCERT.p12").toPath().toString()));
+		getDefault(
+				getJSONObject(getJSONObject(cfg, "daemonSettings"),
+						"SSLSettings"), "SSL_ExternalSecret", "secret");
 
 		getJSONObject(cfg, "processSettings");
-		getDefault(getJSONObject(cfg, "processSettings"), "processExcecutable", "");
-		getDefault(getJSONObject(cfg, "processSettings"), "processWorkingDirectory", "");
-		getDefault(getJSONObject(cfg, "processSettings"), "processArguments", "");
-		getDefault(getJSONObject(cfg, "processSettings"), "processHasShutdownCommand", false);
-		getDefault(getJSONObject(cfg, "processSettings"), "processShutdownCommand", "");
-		getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart", true);
+		getDefault(getJSONObject(cfg, "processSettings"), "processExcecutable",
+				"");
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"processWorkingDirectory", "");
+		getDefault(getJSONObject(cfg, "processSettings"), "processArguments",
+				"");
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"processHasShutdownCommand", false);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"processShutdownCommand", "");
+		getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart",
+				true);
 		getJSONObject(cfg, "authSettings");
-		getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable", true);
-		getDefault(getJSONObject(cfg, "authSettings"), "authenticationSystem", "JsonDataSystem");
+		getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable",
+				true);
+		getDefault(getJSONObject(cfg, "authSettings"), "authenticationSystem",
+				"JsonDataSystem");
 		getJSONObject(cfg, "webSettings");
 		getDefault(getJSONObject(cfg, "webSettings"), "webAPIEnable", true);
 		saveConfig();

@@ -1,4 +1,3 @@
-
 package net.petercashel.jmsDd.auth.DataSystems.JsonDataSystem;
 
 import com.google.gson.annotations.SerializedName;
