@@ -37,5 +37,10 @@
   		<artifactId>jna-platform</artifactId>
   		<version>4.1.0</version>
   	</dependency>
+  	<dependency>
+  		<groupId>net.petercashel.JMSDd</groupId>
+  		<artifactId>JMSDd-client</artifactId>
+  		<version>0.4.0-SNAPSHOT</version>
+  	</dependency>
   </dependencies>
 </project>

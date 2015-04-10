@@ -8,9 +8,16 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.URLDecoder;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class installMain {
 
@@ -97,10 +104,29 @@ public class installMain {
 			out.println("Installation Failed.");
 			System.exit(1);
 		}
-
+		File service = new File(serviceDir, "JMSDd.service");
+		if (service.exists()) {
+			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "disable",
+					"JMSDd.service");
+			pb1.redirectOutput(Redirect.PIPE);
+			Process ps1 = null;
+			try {
+				ps1 = pb1.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				ps1.waitFor();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			service.delete();
+		}
 		FileOutputStream o = null;
 		try {
-			o = new FileOutputStream(new File(serviceDir, "JMSDd.service"),
+			o = new FileOutputStream(service,
 					true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -163,7 +189,7 @@ public class installMain {
 		}
 
 		FileOutputStream o1 = null;
-		File client = new File(usrsbin, "JMSDc.sh");
+		File client = new File(usrsbin, "JMSDc");
 		try {
 			o1 = new FileOutputStream(client, true);
 		} catch (FileNotFoundException e) {
@@ -190,7 +216,8 @@ public class installMain {
 		}
 
 		client.setExecutable(true);
-
+		libc.chmod(client.toPath().toString(), 0777);
+		
 		ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable",
 				"JMSDd.service");
 		pb1.redirectOutput(Redirect.PIPE);
@@ -224,6 +251,31 @@ public class installMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+		
+		Path p11 = installDir.toPath();
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	      @Override
+	      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+	          throws IOException {
+	        System.out.println(file);
+	        libc.chmod(file.toString(), 0777);
+	        return FileVisitResult.CONTINUE;
+	      }
+	    };
 
+	    try {
+	      Files.walkFileTree(p11, fv);
+	    } catch (IOException e) {
+	      e.printStackTrace();
+	    }
+		
+		
+		
+		out.println("Installation Complete!");
+	}
+	
+	private static CLibrary libc = (CLibrary) Native.loadLibrary("c", CLibrary.class);
+	interface CLibrary extends Library {
+	    public int chmod(String path, int mode);
+	}
 }

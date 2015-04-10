@@ -50,13 +50,18 @@ public class daemonMain {
 
 	public static void main(String[] args) {
 		boolean run = true;
+		boolean runCLI = false;
 		for (String s : args) {
 			if (s.equalsIgnoreCase("install")) {
 				run = false;
 			}
+			if (s.equalsIgnoreCase("client")) {
+				runCLI = true;
+			}
 		}
 		if (run)
-			main();
+			if (runCLI) net.petercashel.jmsDc.clientMain.main(args);
+			else main();
 		else
 			net.petercashel.installer.installMain.main(args);
 	}
