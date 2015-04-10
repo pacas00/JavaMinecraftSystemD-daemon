@@ -15,7 +15,7 @@ import java.nio.file.StandardCopyOption;
 public class installMain {
 
 	static File serviceDir = new File("/etc/systemd/system");
-	static File usrbin = new File("/usr/bin");
+	static File usrsbin = new File("/usr/sbin");
 	static File installDir = null;
 	static boolean rootInstall = false;
 
@@ -163,7 +163,7 @@ public class installMain {
 		}
 
 		FileOutputStream o1 = null;
-		File client = new File(usrbin, "JMSDc.sh");
+		File client = new File(usrsbin, "JMSDc.sh");
 		try {
 			o1 = new FileOutputStream(client, true);
 		} catch (FileNotFoundException e) {
