@@ -63,8 +63,10 @@ public class daemonMain {
 			}
 		}
 		if (run)
-			if (runCLI) net.petercashel.jmsDc.clientMain.main(args);
-			else main();
+			if (runCLI)
+				net.petercashel.jmsDc.clientMain.main(args);
+			else
+				main();
 		else
 			net.petercashel.installer.installMain.main(args);
 	}

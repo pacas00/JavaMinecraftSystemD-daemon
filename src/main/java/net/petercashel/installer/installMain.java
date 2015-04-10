@@ -141,8 +141,7 @@ public class installMain {
 		}
 		FileOutputStream o = null;
 		try {
-			o = new FileOutputStream(service,
-					true);
+			o = new FileOutputStream(service, true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -232,7 +231,7 @@ public class installMain {
 
 		client.setExecutable(true);
 		libc.chmod(client.toPath().toString(), 0777);
-		
+
 		ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable",
 				"JMSDd.service");
 		pb1.redirectOutput(Redirect.PIPE);
@@ -266,31 +265,31 @@ public class installMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		Path p11 = installDir.toPath();
-	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
-	      @Override
-	      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-	          throws IOException {
-	        System.out.println(file);
-	        libc.chmod(file.toString(), 0777);
-	        return FileVisitResult.CONTINUE;
-	      }
-	    };
 
-	    try {
-	      Files.walkFileTree(p11, fv);
-	    } catch (IOException e) {
-	      e.printStackTrace();
-	    }
-		
-		
-		
+		Path p11 = installDir.toPath();
+		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file,
+					BasicFileAttributes attrs) throws IOException {
+				System.out.println(file);
+				libc.chmod(file.toString(), 0777);
+				return FileVisitResult.CONTINUE;
+			}
+		};
+
+		try {
+			Files.walkFileTree(p11, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		out.println("Installation Complete!");
 	}
-	
-	private static CLibrary libc = (CLibrary) Native.loadLibrary("c", CLibrary.class);
+
+	private static CLibrary libc = (CLibrary) Native.loadLibrary("c",
+			CLibrary.class);
+
 	interface CLibrary extends Library {
-	    public int chmod(String path, int mode);
+		public int chmod(String path, int mode);
 	}
 }
