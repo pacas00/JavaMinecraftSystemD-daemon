@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Timer;
 import java.util.TimerTask;
 
 import com.sun.jna.Pointer;
@@ -51,6 +52,7 @@ public class daemonMain {
 	static Process p = null;
 	static boolean pHasStopCmd = false;
 	private static int pid = 0;
+	static Timer watchdoggy;
 
 	public static void main(String[] args) {
 		boolean run = true;
@@ -214,6 +216,9 @@ public class daemonMain {
 	}
 
 	public static void ShutdownProcess() throws NullPointerException {
+		watchdoggy.cancel();
+		watchdoggy.purge();
+		watchdoggy = null;
 		if (pHasStopCmd) {
 			String s = Configuration.getDefault(Configuration.getJSONObject(
 					Configuration.cfg, "processSettings"),
@@ -281,6 +286,9 @@ public class daemonMain {
 			}
 		});
 
+		watchdoggy = new Timer();
+		watchdoggy.schedule(new Watchdog(), 5 * 60 * 1000);
+		
 		if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
 			/* get the PID on unix/linux systems */
 			try {
