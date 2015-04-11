@@ -1,4 +1,4 @@
-# JavaMinecraftSystemD-daemon[![build status](http://ci.petercashel.net/projects/5/status.png?ref=master)](http://ci.petercashel.net/projects/5?ref=master)
+# JavaMinecraftSystemD-daemon [![build status](http://ci.petercashel.net/projects/5/status.png?ref=master)](http://ci.petercashel.net/projects/5?ref=master)
 
 
 
