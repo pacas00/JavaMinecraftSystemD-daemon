@@ -16,38 +16,39 @@
 
 package net.petercashel.jmsDd.command.commands;
 
-import io.netty.util.internal.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import net.petercashel.jmsDd.daemonMain;
 import net.petercashel.jmsDd.command.ICommand;
 import net.petercashel.jmsDd.command.commandServer;
+import net.petercashel.nettyCore.server.serverCore;
 
-public class help implements ICommand {
-
-	public static List<String> helpList = new ArrayList<String>();
+public class server implements ICommand {
 
 	@Override
 	public String commandName() {
 		// TODO Auto-generated method stub
-		return "help";
+		return "server";
 	}
 
 	@Override
 	public boolean processCommand(String[] args) {
-		if (helpList.size() < 1)
-			commandServer.out
-					.println("Help was run but there is no helping you.");
-		else {
-			Collections.sort(helpList);
-			String s = "List of Commands: ";
-			for (String str : helpList)
-				s = s + str + ", ";
-			s = s.substring(0, s.length() - 2);
+		if (args.length < 2) {
+			System.out.println("Invalid Arguments.");
+			return true;
 		}
-		return true;
+		if (args[1].equalsIgnoreCase("help")) {
+			help();
+			return true;
+		}
+		if (args[1].equalsIgnoreCase("shutdown")) {
+			commandServer.out.println("Server is Shutting Down");
+			daemonMain.shutdown();
+			return true;
+		}
+		return false;
+	}
+
+	private void help() {
+		System.out.println("help,shutdown");
 	}
 
 	@Override

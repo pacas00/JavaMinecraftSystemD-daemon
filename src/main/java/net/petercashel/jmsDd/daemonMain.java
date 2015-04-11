@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TimerTask;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
@@ -329,5 +330,30 @@ public class daemonMain {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	static class Watchdog extends TimerTask {
+
+		@Override
+		public void run() {
+			StartProcess();
+		}
+
+	}
+
+	public static void StartProcess() {
+		try {
+			// p is null on start, so assume p being null means not running.
+			if (p != null) {
+				// Process never has an exitcode when running and therefore
+				// throws
+				int i = p.exitValue();
+			}
+			// If we get here, it died
+			RunProcess();
+		} catch (IllegalThreadStateException e) {
+			// All Good, process is alive.
+		}
+
 	}
 }

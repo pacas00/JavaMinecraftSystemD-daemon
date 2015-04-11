@@ -18,6 +18,7 @@ package net.petercashel.jmsDd.command;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -41,8 +42,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.jmsDd.daemonMain;
+import net.petercashel.jmsDd.command.commands.help;
 import net.petercashel.nettyCore.common.PacketRegistry;
 import net.petercashel.nettyCore.common.packets.IOOutPacket;
 import net.petercashel.nettyCore.server.serverCore;
@@ -143,6 +146,7 @@ public class commandServer {
 	public static void registerCommand(Class<? extends ICommand> com) {
 		try {
 			map.put(com.newInstance().commandName(), com);
+			help.helpList.add(com.newInstance().commandName());
 			System.out.println("Registered Command: ."
 					+ com.newInstance().commandName());
 		} catch (InstantiationException e) {
