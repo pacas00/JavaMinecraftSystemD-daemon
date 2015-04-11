@@ -46,6 +46,7 @@ public class help implements ICommand {
 			for (String str : helpList)
 				s = s + str + ", ";
 			s = s.substring(0, s.length() - 2);
+			commandServer.out.println(s);
 		}
 		return true;
 	}

@@ -32,7 +32,7 @@ public class process implements ICommand {
 	@Override
 	public boolean processCommand(String[] args) {
 		if (args.length < 2) {
-			System.out.println("Invalid Arguments.");
+			commandServer.out.println("Invalid Arguments.");
 			return true;
 		}
 		if (args[1].equalsIgnoreCase("help")) {
@@ -59,7 +59,7 @@ public class process implements ICommand {
 	}
 
 	private void help() {
-		System.out.println("help,start,stop,restart,shutdown");
+		commandServer.out.println("help,start,stop,restart,shutdown");
 	}
 
 	@Override
