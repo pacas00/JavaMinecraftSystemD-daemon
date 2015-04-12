@@ -16,6 +16,8 @@
 
 package net.petercashel.jmsDd.command.commands;
 
+import net.petercashel.jmsDd.auth.AuthSystem;
+import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem.permissionLevels;
 import net.petercashel.jmsDd.command.ICommand;
 import net.petercashel.jmsDd.command.commandServer;
 
@@ -45,9 +47,8 @@ public class printargs implements ICommand {
 	}
 
 	@Override
-	public int requiredPermissionLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+	public permissionLevels requiredPermissionLevel() {
+		return permissionLevels.USER;
 	}
 
 	@Override

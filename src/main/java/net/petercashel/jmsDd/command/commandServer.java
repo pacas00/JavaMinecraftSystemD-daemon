@@ -18,6 +18,7 @@ package net.petercashel.jmsDd.command;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.nio.NioEventLoopGroup;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -45,9 +47,11 @@ import java.util.jar.JarFile;
 
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.jmsDd.daemonMain;
+import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commands.help;
 import net.petercashel.nettyCore.common.PacketRegistry;
 import net.petercashel.nettyCore.common.packets.IOOutPacket;
+import net.petercashel.nettyCore.server.ChannelUserHolder;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
 import sun.net.www.protocol.file.FileURLConnection;
@@ -98,10 +102,10 @@ public class commandServer {
 							b = s.getBytes();
 						}
 						if (b.length > 0) {
-							for (Channel c : serverCore.clientConnectionMap
+							for (ChannelUserHolder c : serverCore.clientConnectionMap
 									.values()) {
 								(PacketRegistry.pack(new IOOutPacket(b.length,
-										b))).sendPacket(c);
+										b))).sendPacket(c.c);
 							}
 							if (serverCoreUDS.alive) {
 								for (Channel c : serverCoreUDS.clientConnectionMap
@@ -319,34 +323,73 @@ public class commandServer {
 		return classes;
 	}
 
-	public static void processCommand(String s) {
-		String[] args = s.split(" ");
-		if (map.containsKey(args[0])) {
-			ICommand c = null;
-			try {
-				c = map.get(args[0]).newInstance();
+	public static void processCommand(String s, Channel client) {
+		if (client.eventLoop() instanceof NioEventLoopGroup) {
+			//Only do this version for non CLI
+			String[] args = s.split(" ");
+			if (map.containsKey(args[0])) {
+				ICommand c = null;
 				try {
-					c.processCommand(args);
-				} catch (NullPointerException e) {
+					c = map.get(args[0]).newInstance();
+					ChannelUserHolder chUser = serverCore.clientConnectionMap.get(client.remoteAddress());
+					if (AuthSystem.backend.GetPermissionLevel(chUser.user) < c.requiredPermissionLevel().ordinal()) {
+						out.println("COMMAND ERROR. " + chUser.user + " does not have permission to use this command. " + args[0]);
+						return;
+					}
+					try {
+						c.processCommand(args);
+					} catch (NullPointerException e) {
+						out.println("COMMAND ERROR");
+						e.printStackTrace(out);
+						e.printStackTrace();
+					}
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 					out.println("COMMAND ERROR");
 					e.printStackTrace(out);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
+					out.println("COMMAND ERROR");
+					e.printStackTrace(out);
 				}
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				out.println("COMMAND ERROR");
-				e.printStackTrace(out);
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				out.println("COMMAND ERROR");
-				e.printStackTrace(out);
+			} else {
+				out.println("INVALID COMMAND");
+				out.flush();
 			}
+			
 		} else {
-			out.println("INVALID COMMAND");
-			out.flush();
+			String[] args = s.split(" ");
+			if (map.containsKey(args[0])) {
+				ICommand c = null;
+				try {
+					c = map.get(args[0]).newInstance();
+					try {
+						c.processCommand(args);
+					} catch (NullPointerException e) {
+						out.println("COMMAND ERROR");
+						e.printStackTrace(out);
+						e.printStackTrace();
+					}
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					out.println("COMMAND ERROR");
+					e.printStackTrace(out);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					out.println("COMMAND ERROR");
+					e.printStackTrace(out);
+				}
+			} else {
+				out.println("INVALID COMMAND");
+				out.flush();
+			}
 		}
+		
+		
 	}
 
 }

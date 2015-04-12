@@ -28,12 +28,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import net.petercashel.commonlib.random.HexCodeGenerator;
 import net.petercashel.jmsDd.Configuration;
 import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem;
@@ -148,6 +150,7 @@ public class JsonDataSystem implements IAuthDataSystem {
 		d.Username = user;
 		userList.put(user, d);
 		ResetToken(user);
+		SetPermissionLevel(user, 0);
 	}
 
 	@Override
@@ -159,6 +162,7 @@ public class JsonDataSystem implements IAuthDataSystem {
 		d.Token = token;
 		userList.put(user, d);
 		ResetTokenSalt(user);
+		SetPermissionLevel(user, 0);
 	}
 
 	@Override
@@ -247,5 +251,18 @@ public class JsonDataSystem implements IAuthDataSystem {
 
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, encoding);
+	}
+
+	@Override
+	public int GetPermissionLevel(String user) {
+		// TODO Auto-generated method stub
+		return userList.get(user).perms;
+	}
+
+	@Override
+	public void SetPermissionLevel(String user, int level) {
+		UserData d = userList.get(user);
+		d.perms = level;
+		userList.put(d.Username, d);		
 	}
 }

@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.petercashel.jmsDd.auth.AuthSystem;
+import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem.permissionLevels;
 import net.petercashel.jmsDd.command.ICommand;
 import net.petercashel.jmsDd.command.commandServer;
 
@@ -52,9 +54,8 @@ public class help implements ICommand {
 	}
 
 	@Override
-	public int requiredPermissionLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+	public permissionLevels requiredPermissionLevel() {
+		return permissionLevels.USER;
 	}
 
 	@Override

@@ -28,4 +28,6 @@ public class UserData {
 	@SerializedName("TokenSalt")
 	public String TokenSalt;
 
+	@SerializedName("perms")
+	public int perms = 0;
 }

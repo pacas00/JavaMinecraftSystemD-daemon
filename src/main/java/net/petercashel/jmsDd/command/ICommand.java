@@ -16,13 +16,15 @@
 
 package net.petercashel.jmsDd.command;
 
+import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem.permissionLevels;
+
 public interface ICommand {
 
 	public String commandName();
 
 	public boolean processCommand(String[] args);
 
-	public int requiredPermissionLevel();
+	public permissionLevels requiredPermissionLevel();
 
 	public void RegisterMe();
 
