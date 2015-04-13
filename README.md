@@ -6,6 +6,12 @@ This project contains the daemon code for the Java Minecraft SystemD daemon (JMS
 
 
 
+The rough design doc, changelog and roadmap can be found here:
+
+https://docs.google.com/document/d/1QZ_71kiXckrE_MQx1Z_2fksTmf_9lnKk__RGg43s8ko/edit?usp=sharing
+
+
+
 License
 =======
 
