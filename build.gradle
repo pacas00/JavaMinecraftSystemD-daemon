@@ -41,6 +41,16 @@ dependencies {
 	compile "com.google.code.gson:gson:2.3.1"
     compile "net.java.dev.jna:jna:4.1.0"
 	compile "net.java.dev.jna:jna-platform:4.1.0"
+
+	compile "com.jcabi:jcabi-aether:0.10.1"
+	compile "org.apache.maven:maven-core:3.0.5"
+	
+
+  	<dependency>
+  		<groupId>org.apache.maven</groupId>
+  		<artifactId>maven-core</artifactId>
+  		<version>3.0.5</version>
+  	</dependency>
 }
 
 jar {
