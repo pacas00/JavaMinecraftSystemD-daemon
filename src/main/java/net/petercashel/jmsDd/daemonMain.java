@@ -67,11 +67,9 @@ public class daemonMain {
 		}
 		if (run)
 			if (runCLI) {
-				DepLoader.main(args);
 				net.petercashel.jmsDc.clientMain.main(args);
 			}
 			else {
-				DepLoader.main(args);
 				main();
 			}
 		else {

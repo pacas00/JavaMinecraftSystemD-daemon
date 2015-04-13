@@ -55,7 +55,7 @@ dependencies {
 
 jar {
     manifest { 
-    attributes "Main-Class": "net.petercashel.jmsDd.daemonMain"
+    attributes "Main-Class": "net.petercashel.jmsDd.DepLoader"
   }  
 }
 
