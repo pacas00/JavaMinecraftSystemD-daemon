@@ -44,23 +44,11 @@ dependencies {
 }
 
 jar {
-	classifier = 'thin'
     manifest { 
     attributes "Main-Class": "net.petercashel.jmsDd.daemonMain"
   }  
 }
 
-task fatJar(type: Jar) {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-	manifest { 
-    attributes "Main-Class": "net.petercashel.jmsDd.daemonMain"
-  } 
-}
-
-artifacts {
-	archives fatJar
-}
 
 uploadArchives {
     repositories {

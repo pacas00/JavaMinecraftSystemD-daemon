@@ -162,6 +162,7 @@ public class installMain {
 		p.println("Description=JavaMinecraftSystemDdaemon");
 		p.println();
 		p.println("[Service]");
+		p.println("Environment=\"JMSDdWkDir= " + dir + "\"");
 		p.println("ExecStart=/usr/bin/java -jar " + dir + "/JMSDd-daemon.jar");
 		if (!rootInstall)
 			p.println("User=" + username);

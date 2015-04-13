@@ -54,7 +54,7 @@ public class daemonMain {
 	private static int pid = 0;
 	static Timer watchdoggy;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		boolean run = true;
 		boolean runCLI = false;
 		for (String s : args) {
@@ -66,12 +66,17 @@ public class daemonMain {
 			}
 		}
 		if (run)
-			if (runCLI)
+			if (runCLI) {
+				DepLoader.main(args);
 				net.petercashel.jmsDc.clientMain.main(args);
-			else
+			}
+			else {
+				DepLoader.main(args);
 				main();
-		else
+			}
+		else {
 			net.petercashel.installer.installMain.main(args);
+		}
 	}
 
 	public static void main() {
@@ -82,7 +87,7 @@ public class daemonMain {
 				&& getDefault(getJSONObject(cfg, "daemonSettings"),
 						"serverPortEnable", false) == false) {
 			System.err
-					.println("The daemon requires that either serverCLIEnable or serverPortEnable is enabled");
+			.println("The daemon requires that either serverCLIEnable or serverPortEnable is enabled");
 			System.err.println("Please correct your configuration");
 			System.err.println(new File(configDir, "config.json").toPath());
 			System.exit(1);
@@ -91,9 +96,9 @@ public class daemonMain {
 		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable",
 				false) == true && OS_Util.isWinNT()) {
 			System.err
-					.println("Socket based CLI connections do not function on the Windows Platform.");
+			.println("Socket based CLI connections do not function on the Windows Platform.");
 			System.err
-					.println("Please correct your configuration by disabling serverCLIEnable");
+			.println("Please correct your configuration by disabling serverCLIEnable");
 			System.err.println(new File(configDir, "config.json").toPath());
 			System.exit(1);
 
@@ -116,7 +121,7 @@ public class daemonMain {
 			SSLContextProvider.pathToSSLCert = getDefault(
 					getJSONObject(getJSONObject(cfg, "daemonSettings"),
 							"SSLSettings"), "SSL_ExternalPath", (new File(
-							configDir, "SSLCERT.p12").toPath().toString()));
+									configDir, "SSLCERT.p12").toPath().toString()));
 			SSLContextProvider.SSLCertSecret = getDefault(
 					getJSONObject(getJSONObject(cfg, "daemonSettings"),
 							"SSLSettings"), "SSL_ExternalSecret", "secret");
@@ -288,7 +293,7 @@ public class daemonMain {
 
 		watchdoggy = new Timer();
 		watchdoggy.schedule(new Watchdog(), 5 * 60 * 1000);
-		
+
 		if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
 			/* get the PID on unix/linux systems */
 			try {
