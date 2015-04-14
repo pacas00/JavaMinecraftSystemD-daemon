@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -52,6 +53,7 @@ public class daemonMain {
 	static Process p = null;
 	static boolean pHasStopCmd = false;
 	private static int pid = 0;
+	static boolean runDog = true;
 	static Timer watchdoggy;
 
 	public static void main(String[] args) throws IOException {
@@ -173,6 +175,18 @@ public class daemonMain {
 		}
 		// init other
 
+		runDog = getDefault(getJSONObject(cfg, "processSettings"),
+				"Watchdog", true);
+
+		if (getDefault(getJSONObject(cfg, "processSettings"),
+				"AutoRestart", true)) {
+			CreateRestartSchedule(
+					getDefault(getJSONObject(cfg, "processSettings"),
+							"AutoRestartHour", 5),
+							getDefault(getJSONObject(cfg, "processSettings"),
+									"AutoRestartMinute", 0));
+		}
+
 		// init minecraft instance
 		if (getDefault(getJSONObject(cfg, "processSettings"),
 				"processAutoStart", true))
@@ -205,23 +219,64 @@ public class daemonMain {
 	}
 
 	public static void RestartProcess() {
+		ShutdownProcess();
 		try {
-			p.exitValue();
+			Thread.sleep(5000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			// p is null on start, so assume p being null means not running.
+			if (p != null) {
+				// Process never has an exitcode when running and therefore
+				// throws
+				int i = p.exitValue();
+			}
+			// If we get here, it died
 			RunProcess();
 		} catch (IllegalThreadStateException e) {
-			try {
-				ShutdownProcess();
-			} catch (NullPointerException n) {
-			}
-		} catch (NullPointerException e) {
-			RunProcess();
+			// Process isnt dead, start wait loop.
+			RestartProcessLoop(1);
 		}
 	}
 
+	private static void RestartProcessLoop(int i) {
+		if (i < 3) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				// p is null on start, so assume p being null means not running.
+				if (p != null) {
+					// Process never has an exitcode when running and therefore
+					// throws
+					int ex = p.exitValue();
+				}
+				// If we get here, it died
+				RunProcess();
+			} catch (IllegalThreadStateException e) {
+				RestartProcessLoop(i + 1);
+			}
+		} else {
+			String s = "Unable to restart process";
+			commandServer.out.println(s);
+			System.out.println(s);
+		}
+		
+		
+	}
+
 	public static void ShutdownProcess() throws NullPointerException {
-		watchdoggy.cancel();
-		watchdoggy.purge();
-		watchdoggy = null;
+		if (runDog) {
+			watchdoggy.cancel();
+			watchdoggy.purge();
+			watchdoggy = null;
+		}
+
 		if (pHasStopCmd) {
 			String s = Configuration.getDefault(Configuration.getJSONObject(
 					Configuration.cfg, "processSettings"),
@@ -247,98 +302,102 @@ public class daemonMain {
 	}
 
 	private static void RunProcess() {
-		List<String> strings = new ArrayList<String>();
-		strings.add(Configuration.getDefault(Configuration.getJSONObject(
-				Configuration.cfg, "processSettings"), "processExcecutable", ""));
-		String[] args = Configuration.getDefault(
-				Configuration.getJSONObject(Configuration.cfg,
-						"processSettings"), "processArguments", "").split(" ");
-		for (String s : args)
-			strings.add(s);
-		ProcessBuilder pb = new ProcessBuilder(strings);
-		Map<String, String> env = pb.environment();
+		while (daemonMain.run) {
+			List<String> strings = new ArrayList<String>();
+			strings.add(Configuration.getDefault(Configuration.getJSONObject(
+					Configuration.cfg, "processSettings"), "processExcecutable", ""));
+			String[] args = Configuration.getDefault(
+					Configuration.getJSONObject(Configuration.cfg,
+							"processSettings"), "processArguments", "").split(" ");
+			for (String s : args)
+				strings.add(s);
+			ProcessBuilder pb = new ProcessBuilder(strings);
+			Map<String, String> env = pb.environment();
 
-		Path currentRelativePath = Paths.get(Configuration.getDefault(
-				Configuration.getJSONObject(Configuration.cfg,
-						"processSettings"), "processWorkingDirectory", ""));
-		String s = currentRelativePath.toAbsolutePath().toString();
-		pb.directory(new File(s));
+			Path currentRelativePath = Paths.get(Configuration.getDefault(
+					Configuration.getJSONObject(Configuration.cfg,
+							"processSettings"), "processWorkingDirectory", ""));
+			String s = currentRelativePath.toAbsolutePath().toString();
+			pb.directory(new File(s));
 
-		pb.redirectErrorStream(true);
+			pb.redirectErrorStream(true);
 
-		try {
-			p = pb.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			try {
+				p = pb.start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-		commandServer.Progin = p.getOutputStream();
-		final InputStream in = p.getInputStream();
+			commandServer.Progin = p.getOutputStream();
+			final InputStream in = p.getInputStream();
 
-		threadManager.getInstance().addRunnable(new Runnable() {
-			@Override
-			public void run() {
-				Scanner sc = new Scanner(in);
-				while (daemonMain.run) {
-					while (sc.hasNextLine()) {
-						String s = sc.nextLine();
-						commandServer.out.println(s);
-						System.out.println(s);
+			threadManager.getInstance().addRunnable(new Runnable() {
+				@Override
+				public void run() {
+					Scanner sc = new Scanner(in);
+					while (daemonMain.run) {
+						while (sc.hasNextLine()) {
+							String s = sc.nextLine();
+							commandServer.out.println(s);
+							System.out.println(s);
+						}
 					}
 				}
+			});
+			if (runDog) {
+				watchdoggy = new Timer();
+				int i = getDefault(getJSONObject(cfg, "processSettings"),
+						"WatchdogMinuteInterval", 5);
+				watchdoggy.schedule(new Watchdog(), i * 60 * 1000);
 			}
-		});
+			if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+				/* get the PID on unix/linux systems */
+				try {
+					Field f = p.getClass().getDeclaredField("pid");
+					f.setAccessible(true);
+					pid = f.getInt(p);
+				}
 
-		watchdoggy = new Timer();
-		watchdoggy.schedule(new Watchdog(), 5 * 60 * 1000);
-
-		if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
-			/* get the PID on unix/linux systems */
-			try {
-				Field f = p.getClass().getDeclaredField("pid");
-				f.setAccessible(true);
-				pid = f.getInt(p);
+				catch (Throwable e) {
+				}
 			}
-
-			catch (Throwable e) {
+			if (p.getClass().getName().equals("java.lang.Win32Process")
+					|| p.getClass().getName().equals("java.lang.ProcessImpl")) {
+				/* determine the pid on windows plattforms */
+				try {
+					Field f = p.getClass().getDeclaredField("handle");
+					f.setAccessible(true);
+					long handl = f.getLong(p);
+					Kernel32 kernel = Kernel32.INSTANCE;
+					HANDLE handle = new HANDLE();
+					handle.setPointer(Pointer.createConstant(handl));
+					pid = kernel.GetProcessId(handle);
+				} catch (Throwable e) {
+				}
 			}
-		}
-		if (p.getClass().getName().equals("java.lang.Win32Process")
-				|| p.getClass().getName().equals("java.lang.ProcessImpl")) {
-			/* determine the pid on windows plattforms */
-			try {
-				Field f = p.getClass().getDeclaredField("handle");
-				f.setAccessible(true);
-				long handl = f.getLong(p);
-				Kernel32 kernel = Kernel32.INSTANCE;
-				HANDLE handle = new HANDLE();
-				handle.setPointer(Pointer.createConstant(handl));
-				pid = kernel.GetProcessId(handle);
-			} catch (Throwable e) {
-			}
-		}
-		if (pid != 0) {
-			File f = new File(configDir, "process.pid");
-			f.delete();
-			FileOutputStream o = null;
-			try {
-				o = new FileOutputStream(f, true);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			PrintStream p = new PrintStream(o, true);
-			p.print(pid);
-			p.flush();
-			p.close();
-			try {
-				o.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				o.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (pid != 0) {
+				File f = new File(configDir, "process.pid");
+				f.delete();
+				FileOutputStream o = null;
+				try {
+					o = new FileOutputStream(f, true);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+				PrintStream p = new PrintStream(o, true);
+				p.print(pid);
+				p.flush();
+				p.close();
+				try {
+					o.flush();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					o.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -366,5 +425,43 @@ public class daemonMain {
 			// All Good, process is alive.
 		}
 
+	}
+
+	static void CreateRestartSchedule(final int h, final int m) {
+		Calendar timeOfDay = Calendar.getInstance();
+		timeOfDay.set(Calendar.HOUR_OF_DAY, h);
+		timeOfDay.set(Calendar.MINUTE, m);
+		timeOfDay.set(Calendar.SECOND, 0);
+
+		new DailyRunnerDaemon(timeOfDay, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					// call whatever your daily task is here
+					while (daemonMain.run) {
+						AutoRestart(h,m);
+					}
+				}
+				catch(Exception e)
+				{
+					commandServer.out.println("An error occurred performing daily restart");
+					System.out.println("An error occurred performing daily restart");
+					e.printStackTrace(commandServer.out);
+					e.printStackTrace(System.out);
+				}
+			}
+		}, "daily-restart").start();
+
+
+	}
+
+	protected static void AutoRestart(int h, int m) {
+		while (daemonMain.run) {
+			RestartProcess();
+			CreateRestartSchedule(h,m);
+		}
 	}
 }

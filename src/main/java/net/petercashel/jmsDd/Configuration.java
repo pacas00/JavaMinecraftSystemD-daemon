@@ -168,6 +168,16 @@ public class Configuration {
 				"processShutdownCommand", "");
 		getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart",
 				true);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"Watchdog", true);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"WatchdogMinuteInterval", 5);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"AutoRestart", true);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"AutoRestartHour", 5);
+		getDefault(getJSONObject(cfg, "processSettings"),
+				"AutoRestartMinute", 0);
 		getJSONObject(cfg, "authSettings");
 		getDefault(getJSONObject(cfg, "authSettings"), "authenticationEnable",
 				true);
