@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -27,8 +28,13 @@ public class DepLoader {
 	static File libs = new File(configDir, "./libs/");
 	static File jcabi_aether = null;
 	static File maven305 = null;
+	static File ASMAll = null;
+	static String ASMAll_url = "http://central.maven.org/maven2/org/ow2/asm/asm-all/5.0.3/asm-all-5.0.3.jar";
+	static File guava = null;
+	static String guava_url = "http://central.maven.org/maven2/com/google/guava/guava/18.0/guava-18.0.jar";
 	
 	public static void main(String[] args) throws IOException {
+		
 		System.out.println("Downloading Core Libraries");
 		Map<String, String> env = System.getenv();
 		configDir.mkdirs();
@@ -88,6 +94,53 @@ public class DepLoader {
 			throw e;
 			
 		}
+		
+		ASMAll = new File(libs, "asm-all.jar");
+		if (ASMAll.exists()) { } else {
+			try {
+				System.out.println("Downloading: ASM-All");
+				URL Json = new URL(ASMAll_url);
+				ReadableByteChannel rbc = Channels.newChannel(Json.openStream());
+				FileOutputStream fos;
+				fos = new FileOutputStream(ASMAll);
+				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			} catch (FileNotFoundException e) {
+				throw e;
+			} catch (IOException e) {
+				throw e;
+			}
+			}
+		try {
+			addFile(ASMAll);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw e;
+			
+		}
+		
+		guava = new File(libs, "guava.jar");
+		if (guava.exists()) { } else {
+			try {
+				System.out.println("Downloading: Google Guava");
+				URL Json = new URL(guava_url);
+				ReadableByteChannel rbc = Channels.newChannel(Json.openStream());
+				FileOutputStream fos;
+				fos = new FileOutputStream(guava);
+				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+			} catch (FileNotFoundException e) {
+				throw e;
+			} catch (IOException e) {
+				throw e;
+			}
+			}
+		try {
+			addFile(guava);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw e;
+			
+		}
+
 
 		DepLoaderStage2.run(libs);		
 		System.out.println("Loaded Core Libraries");
@@ -164,9 +217,11 @@ public class DepLoader {
 
 	public static void addURL(URL u) throws IOException
 	{
+
+	     
 		URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		Class sysclass = URLClassLoader.class;
-
+ 
 		try {
 			Method method = sysclass.getDeclaredMethod("addURL", parameters);
 			method.setAccessible(true);

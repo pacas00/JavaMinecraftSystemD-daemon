@@ -34,22 +34,30 @@ import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.google.common.eventbus.EventBus;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
+
+
+
+
 
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.commonlib.util.OS_Util;
 import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commandServer;
+import net.petercashel.jmsDd.module.core.ModuleSystem;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
 import net.petercashel.nettyCore.ssl.SSLContextProvider;
 import static net.petercashel.jmsDd.Configuration.*;
+import net.petercashel.jmsDd.event.*;
 
 public class daemonMain {
 
 	public static boolean run = true;
+	public static EventBus eventBus = new EventBus();
 	static Process p = null;
 	static boolean pHasStopCmd = false;
 	private static int pid = 0;
@@ -103,11 +111,14 @@ public class daemonMain {
 			System.exit(1);
 
 		}
+		//Init modules into classpath so event system can startup.
+		ModuleSystem.loadAllModuleJars();
+		eventBus.post(new ModuleConfigEvent(getJSONObject(cfg, "moduleSettings")));
+
 		// init commands
 		AuthSystem.init();
 		commandServer.init();
-		System.out.println(System.getProperty("user.home"));
-
+		eventBus.post(new ModulePreInitEvent());
 		// Do SSL Config Settings
 		serverCore.UseSSL = getDefault(getJSONObject(cfg, "daemonSettings"),
 				"serverSSLEnable", true);
@@ -174,7 +185,9 @@ public class daemonMain {
 			e.printStackTrace();
 		}
 		// init other
-
+		eventBus.post(new ModuleInitEvent());
+		
+		
 		runDog = getDefault(getJSONObject(cfg, "processSettings"),
 				"Watchdog", true);
 
@@ -203,10 +216,12 @@ public class daemonMain {
 				}
 			}
 		}));
+		eventBus.post(new ModulePostInitEvent());
 	}
 
 	public static void shutdown() {
 		run = false;
+		eventBus.post(new ModuleShutdownEvent());
 		try {
 			ShutdownProcess();
 		} catch (NullPointerException n) {

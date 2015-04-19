@@ -52,5 +52,15 @@
   		<artifactId>maven-core</artifactId>
   		<version>3.0.5</version>
   	</dependency>
+  	<dependency>
+  		<groupId>org.ow2.asm</groupId>
+  		<artifactId>asm-all</artifactId>
+  		<version>5.0.3</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.google.guava</groupId>
+  		<artifactId>guava</artifactId>
+  		<version>18.0</version>
+  	</dependency>
   </dependencies>
 </project>
