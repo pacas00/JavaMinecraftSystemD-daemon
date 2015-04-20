@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.petercashel.JMSDd</groupId>
   <artifactId>JMSDd-daemon</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <build>
     <sourceDirectory>src\main\java</sourceDirectory>
     <plugins>
@@ -20,7 +20,7 @@
   	<dependency>
   		<groupId>net.petercashel.JMSDd</groupId>
   		<artifactId>JMSDd-Common</artifactId>
-  		<version>1.0.0</version>
+  		<version>1.0.1</version>
   	</dependency>
   	<dependency>
   		<groupId>com.google.code.gson</groupId>
@@ -40,7 +40,7 @@
   	<dependency>
   		<groupId>net.petercashel.JMSDd</groupId>
   		<artifactId>JMSDd-client</artifactId>
-  		<version>1.0.0</version>
+  		<version>1.0.1</version>
   	</dependency>
   	<dependency>
   		<groupId>com.jcabi</groupId>

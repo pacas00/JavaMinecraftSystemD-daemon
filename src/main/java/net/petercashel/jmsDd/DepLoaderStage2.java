@@ -23,10 +23,10 @@ public class DepLoaderStage2 {
 		try {
 			com.jcabi.aether.Aether resolver = new com.jcabi.aether.Aether(remotes, local);
 			Collection<org.sonatype.aether.artifact.Artifact> deps = resolver.resolve(
-					new org.sonatype.aether.util.artifact.DefaultArtifact("net.petercashel.JMSDd", "JMSDd-Common", "", "jar", "1.0.0"),
+					new org.sonatype.aether.util.artifact.DefaultArtifact("net.petercashel.JMSDd", "JMSDd-Common", "", "jar", "1.0.1"),
 					"runtime"
 					);
-			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("net.petercashel.JMSDd", "JMSDd-client", "", "jar", "1.0.0"),
+			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("net.petercashel.JMSDd", "JMSDd-client", "", "jar", "1.0.1"),
 					"runtime"));
 			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("com.google.code.gson", "gson", "", "jar", "2.3.1"),
 					"runtime"));
