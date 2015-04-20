@@ -163,7 +163,7 @@ public class installMain {
 		p.println();
 		p.println("[Service]");
 		p.println("Environment=\"JMSDdWkDir= " + dir + "\"");
-		p.println("ExecStart=/usr/bin/java -Djava.system.class.loader=net.petercashel.jmsDd.ASMClassLoader -jar " + dir + "/JMSDd-daemon.jar");
+		p.println("ExecStart=/usr/bin/java -jar " + dir + "/JMSDd-daemon.jar");
 		if (!rootInstall)
 			p.println("User=" + username);
 		p.println("Restart=on-abort");
