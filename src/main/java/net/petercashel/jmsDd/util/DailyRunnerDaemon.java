@@ -1,4 +1,4 @@
-package net.petercashel.jmsDd;
+package net.petercashel.jmsDd.util;
 
 import java.util.Calendar;
 import java.util.Date;

@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
-package net.petercashel.jmsDd;
+package net.petercashel.jmsDd.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,7 +25,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
+
 import net.petercashel.commonlib.threading.threadManager;
+import net.petercashel.jmsDd.Configuration;
 import net.petercashel.jmsDd.command.commandServer;
 import static net.petercashel.jmsDd.command.commandServer.out;
 

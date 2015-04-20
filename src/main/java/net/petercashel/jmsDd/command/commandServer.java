@@ -60,7 +60,7 @@ public class commandServer {
 
 	static HashMap<String, Class<? extends ICommand>> map = new HashMap<String, Class<? extends ICommand>>();
 
-	public static int historylimit = 80;
+	public static int historylimit = 160;
 	public static final LinkedBlockingQueue<String> history = new LinkedBlockingQueue<String>(
 			historylimit + 5);
 	public static OutputStream Progin = null;

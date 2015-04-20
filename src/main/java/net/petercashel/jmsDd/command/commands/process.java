@@ -21,6 +21,8 @@ import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem.permissionLevels;
 import net.petercashel.jmsDd.command.ICommand;
 import net.petercashel.jmsDd.command.commandServer;
+import net.petercashel.jmsDd.event.process.ProcessRestartEvent;
+import net.petercashel.jmsDd.event.process.ProcessShutdownEvent;
 import net.petercashel.nettyCore.server.serverCore;
 
 public class process implements ICommand {
@@ -46,15 +48,15 @@ public class process implements ICommand {
 			return true;
 		}
 		if (args[1].equalsIgnoreCase("restart")) {
-			daemonMain.RestartProcess();
+			daemonMain.eventBus.post(new ProcessRestartEvent());
 			return true;
 		}
 		if (args[1].equalsIgnoreCase("stop")) {
-			daemonMain.ShutdownProcess();
+			daemonMain.eventBus.post(new ProcessShutdownEvent());
 			return true;
 		}
 		if (args[1].equalsIgnoreCase("shutdown")) {
-			daemonMain.ShutdownProcess();
+			daemonMain.eventBus.post(new ProcessShutdownEvent());
 			return true;
 		}
 		return false;

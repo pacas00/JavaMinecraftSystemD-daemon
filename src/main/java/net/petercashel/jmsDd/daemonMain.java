@@ -35,6 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
@@ -43,16 +44,34 @@ import com.sun.jna.platform.win32.WinNT.HANDLE;
 
 
 
+
+
+
+
+
+
+
+
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.commonlib.util.OS_Util;
+import net.petercashel.jmsDd.API.API;
 import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commandServer;
-import net.petercashel.jmsDd.module.core.ModuleSystem;
+import net.petercashel.jmsDd.module.ModuleSystem;
+import net.petercashel.jmsDd.util.DailyRunnerDaemon;
+import net.petercashel.jmsDd.util.PrintStreamHandler;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
 import net.petercashel.nettyCore.ssl.SSLContextProvider;
 import static net.petercashel.jmsDd.Configuration.*;
 import net.petercashel.jmsDd.event.*;
+import net.petercashel.jmsDd.event.module.ModuleConfigEvent;
+import net.petercashel.jmsDd.event.module.ModuleInitEvent;
+import net.petercashel.jmsDd.event.module.ModulePostInitEvent;
+import net.petercashel.jmsDd.event.module.ModulePreInitEvent;
+import net.petercashel.jmsDd.event.module.ModuleShutdownEvent;
+import net.petercashel.jmsDd.event.process.ProcessRestartEvent;
+import net.petercashel.jmsDd.event.process.ProcessShutdownEvent;
 
 public class daemonMain {
 
@@ -90,6 +109,7 @@ public class daemonMain {
 	public static void main() {
 		configInit();
 		PrintStreamHandler.run();
+		API.Impl.api = new APICore();
 		if (getDefault(getJSONObject(cfg, "daemonSettings"), "serverCLIEnable",
 				false) == false
 				&& getDefault(getJSONObject(cfg, "daemonSettings"),
@@ -211,7 +231,7 @@ public class daemonMain {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				try {
-					ShutdownProcess();
+					eventBus.post(new ProcessShutdownEvent());
 				} catch (NullPointerException n) {
 				}
 			}
@@ -223,7 +243,7 @@ public class daemonMain {
 		run = false;
 		eventBus.post(new ModuleShutdownEvent());
 		try {
-			ShutdownProcess();
+			eventBus.post(new ProcessShutdownEvent());
 		} catch (NullPointerException n) {
 		}
 		serverCore.shutdown();
@@ -233,8 +253,9 @@ public class daemonMain {
 		saveConfig();
 	}
 
-	public static void RestartProcess() {
-		ShutdownProcess();
+	@Subscribe
+	public static void RestartProcess(ProcessRestartEvent event) {
+		eventBus.post(new ProcessShutdownEvent());
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e1) {
@@ -285,7 +306,8 @@ public class daemonMain {
 		
 	}
 
-	public static void ShutdownProcess() throws NullPointerException {
+	@Subscribe
+	public static void ShutdownProcess(ProcessShutdownEvent event) throws NullPointerException {
 		if (runDog) {
 			watchdoggy.cancel();
 			watchdoggy.purge();
@@ -475,7 +497,7 @@ public class daemonMain {
 
 	protected static void AutoRestart(int h, int m) {
 		while (daemonMain.run) {
-			RestartProcess();
+			eventBus.post(new ProcessRestartEvent());
 			CreateRestartSchedule(h,m);
 		}
 	}

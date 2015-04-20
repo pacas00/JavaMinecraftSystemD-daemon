@@ -1,4 +1,4 @@
-package net.petercashel.jmsDd.event;
+package net.petercashel.jmsDd.event.module;
 
 import com.google.gson.JsonObject;
 

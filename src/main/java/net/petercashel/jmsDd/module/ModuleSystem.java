@@ -1,4 +1,4 @@
-package net.petercashel.jmsDd.module.core;
+package net.petercashel.jmsDd.module;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,9 +31,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.petercashel.jmsDd.Configuration;
-import net.petercashel.jmsDd.CustomURLClassLoader;
 import net.petercashel.jmsDd.DepLoader;
 import net.petercashel.jmsDd.daemonMain;
+import net.petercashel.jmsDd.util.CustomURLClassLoader;
 import sun.net.www.protocol.file.FileURLConnection;
 
 public class ModuleSystem {
@@ -53,13 +53,13 @@ public class ModuleSystem {
 	            WalkFolder(fileEntry);
 	        } else {
 	            if (fileEntry.getName().toLowerCase().endsWith("jar")) {
-	            	loadJar(fileEntry);
+	            	LoadModule(fileEntry);
 	            }
 	        }
 	    }
 	}
 	
-	static void loadJar (File jar) {
+	public static void LoadModule (File jar) {
 		List<String> classNames = new ArrayList<String>();
 		
 		URL[] u = new URL[1];

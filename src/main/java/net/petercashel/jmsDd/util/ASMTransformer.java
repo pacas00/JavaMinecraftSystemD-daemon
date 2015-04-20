@@ -1,11 +1,11 @@
-package net.petercashel.jmsDd;
+package net.petercashel.jmsDd.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.petercashel.jmsDd.module.core.ModuleSystem;
+import net.petercashel.jmsDd.module.ModuleSystem;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassReader;

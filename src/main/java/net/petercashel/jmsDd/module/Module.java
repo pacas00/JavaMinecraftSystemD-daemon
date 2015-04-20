@@ -1,4 +1,4 @@
-package net.petercashel.jmsDd.module.core;
+package net.petercashel.jmsDd.module;
 
 
 import java.lang.annotation.*;
