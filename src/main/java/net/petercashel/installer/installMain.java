@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
+
 package net.petercashel.installer;
 
 import java.io.File;
@@ -49,8 +50,7 @@ public class installMain {
 		out.println("[Press enter for default of root]");
 		String username = c.readLine("Username: ");
 		out.println();
-		if (username.isEmpty() || username.equalsIgnoreCase("")
-				|| username == null) {
+		if (username.isEmpty() || username.equalsIgnoreCase("") || username == null) {
 			rootInstall = true;
 		}
 
@@ -74,14 +74,11 @@ public class installMain {
 
 		String confirm = c.readLine("Are you ready to install? (y/n) ");
 		out.println();
-		if (confirm.isEmpty() || confirm.equalsIgnoreCase("")
-				|| confirm == null || confirm.equalsIgnoreCase("no")
+		if (confirm.isEmpty() || confirm.equalsIgnoreCase("") || confirm == null || confirm.equalsIgnoreCase("no")
 				|| confirm.equalsIgnoreCase("n")) {
 			out.println("Installation Aborted!");
 			System.exit(0);
-		} else if (confirm.equalsIgnoreCase("yes")
-				|| confirm.equalsIgnoreCase("ye")
-				|| confirm.equalsIgnoreCase("ya")
+		} else if (confirm.equalsIgnoreCase("yes") || confirm.equalsIgnoreCase("ye") || confirm.equalsIgnoreCase("ya")
 				|| confirm.equalsIgnoreCase("y")) {
 		} else {
 			out.println("Invalid response.");
@@ -93,7 +90,8 @@ public class installMain {
 		try {
 			installDir.mkdirs();
 			installDir.mkdirs();
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 
 		}
 		if (!installDir.isDirectory()) {
@@ -121,19 +119,20 @@ public class installMain {
 		}
 		File service = new File(serviceDir, "JMSDd.service");
 		if (service.exists()) {
-			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "disable",
-					"JMSDd.service");
+			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "disable", "JMSDd.service");
 			pb1.redirectOutput(Redirect.PIPE);
 			Process ps1 = null;
 			try {
 				ps1 = pb1.start();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				ps1.waitFor();
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -142,7 +141,8 @@ public class installMain {
 		FileOutputStream o = null;
 		try {
 			o = new FileOutputStream(service, true);
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		PrintStream p = new PrintStream(o, true);
@@ -164,8 +164,7 @@ public class installMain {
 		p.println("[Service]");
 		p.println("Environment=\"JMSDdWkDir= " + dir + "\"");
 		p.println("ExecStart=/usr/bin/java -jar " + dir + "/JMSDd-daemon.jar");
-		if (!rootInstall)
-			p.println("User=" + username);
+		if (!rootInstall) p.println("User=" + username);
 		p.println("Restart=on-abort");
 		p.println();
 		p.println("[Install]");
@@ -175,30 +174,32 @@ public class installMain {
 		p.close();
 		try {
 			o.flush();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
 			o.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		String path = installMain.class.getProtectionDomain().getCodeSource()
-				.getLocation().getPath();
+		String path = installMain.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		String decodedPath = null;
 		try {
 			decodedPath = URLDecoder.decode(path, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		File jar = new File(decodedPath);
 		File target = new File(installDir, "JMSDd-daemon.jar");
 		try {
-			Files.copy(jar.toPath(), target.toPath(),
-					StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException e) {
+			Files.copy(jar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -207,62 +208,66 @@ public class installMain {
 		File client = new File(usrsbin, "JMSDc");
 		try {
 			o1 = new FileOutputStream(client, true);
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		PrintStream p1 = new PrintStream(o1, true);
 
 		p1.println("#!/bin/bash");
-		p1.println("java -cp " + target.toPath().toString()
-				+ " net.petercashel.jmsDc.clientMain");
+		p1.println("java -cp " + target.toPath().toString() + " net.petercashel.jmsDc.clientMain");
 		p1.println();
 
 		p1.flush();
 		p1.close();
 		try {
 			o1.flush();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		try {
 			o1.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 
 		client.setExecutable(true);
 		libc.chmod(client.toPath().toString(), 0777);
 
-		ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable",
-				"JMSDd.service");
+		ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable", "JMSDd.service");
 		pb1.redirectOutput(Redirect.PIPE);
 		Process ps1 = null;
 		try {
 			ps1 = pb1.start();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			ps1.waitFor();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		ProcessBuilder pb2 = new ProcessBuilder("systemctl", "start",
-				"JMSDd.service");
+		ProcessBuilder pb2 = new ProcessBuilder("systemctl", "start", "JMSDd.service");
 		pb2.redirectOutput(Redirect.PIPE);
 		Process ps2 = null;
 		try {
 			ps2 = pb1.start();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
 			ps2.waitFor();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -270,8 +275,7 @@ public class installMain {
 		Path p11 = installDir.toPath();
 		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 			@Override
-			public FileVisitResult visitFile(Path file,
-					BasicFileAttributes attrs) throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println(file);
 				libc.chmod(file.toString(), 0777);
 				return FileVisitResult.CONTINUE;
@@ -280,15 +284,15 @@ public class installMain {
 
 		try {
 			Files.walkFileTree(p11, fv);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 
 		out.println("Installation Complete!");
 	}
 
-	private static CLibrary libc = (CLibrary) Native.loadLibrary("c",
-			CLibrary.class);
+	private static CLibrary libc = (CLibrary) Native.loadLibrary("c", CLibrary.class);
 
 	interface CLibrary extends Library {
 		public int chmod(String path, int mode);

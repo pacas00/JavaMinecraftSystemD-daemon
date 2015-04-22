@@ -76,7 +76,7 @@ public class user implements ICommand {
 		}
 		int i = AuthSystem.backend.GetPermissionLevel(args[2]);
 		commandServer.out.println("perm level on user " + args[2] + " is " + i);
-		
+
 	}
 
 	private void setperms(String[] args) {
@@ -87,7 +87,7 @@ public class user implements ICommand {
 		}
 		AuthSystem.backend.SetPermissionLevel(args[2], Integer.parseInt(args[3]));
 		commandServer.out.println("Set perm level on user " + args[2]);
-		
+
 	}
 
 	private void resettokensalt(String[] args) {
@@ -122,10 +122,10 @@ public class user implements ICommand {
 			return;
 		}
 		if (args[3].equalsIgnoreCase("y")) {
-		AuthSystem.backend.DelUser(args[2]);
-		commandServer.out.println("Deleted user " + args[2]);
+			AuthSystem.backend.DelUser(args[2]);
+			commandServer.out.println("Deleted user " + args[2]);
 		}
-		
+
 	}
 
 	private void adduser(String[] args) {
@@ -137,11 +137,11 @@ public class user implements ICommand {
 		try {
 			AuthSystem.backend.AddUser(args[2]);
 			commandServer.out.println("User " + args[2] + " Added!");
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			commandServer.out.println("User " + args[2] + " Already Exists!");
 		}
-		
-		
+
 	}
 
 	private void help() {

@@ -14,8 +14,12 @@
  *    limitations under the License.
  *******************************************************************************/
 
-package net.petercashel.jmsDd.event.process;
+package net.petercashel.jmsDd.event.module;
 
-public class ProcessRestartEvent {
+import net.petercashel.jmsDd.API.API;
+
+public class EventBase {
+	// Added to make getting API instance shorter when working with events
+	public API apiInstance = API.Impl.getAPI();
 
 }

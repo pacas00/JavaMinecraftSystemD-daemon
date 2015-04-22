@@ -17,11 +17,9 @@
 package net.petercashel.jmsDd.command.commands;
 
 import io.netty.util.internal.StringUtil;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem.permissionLevels;
 import net.petercashel.jmsDd.command.ICommand;
@@ -39,9 +37,7 @@ public class help implements ICommand {
 
 	@Override
 	public boolean processCommand(String[] args) {
-		if (helpList.size() < 1)
-			commandServer.out
-					.println("Help was run but there is no helping you.");
+		if (helpList.size() < 1) commandServer.out.println("Help was run but there is no helping you.");
 		else {
 			Collections.sort(helpList);
 			String s = "List of Commands: ";

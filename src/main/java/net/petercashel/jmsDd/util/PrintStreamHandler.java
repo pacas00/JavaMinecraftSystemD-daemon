@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
+
 package net.petercashel.jmsDd.util;
 
 import java.io.File;
@@ -25,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
-
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.jmsDd.Configuration;
 import net.petercashel.jmsDd.command.commandServer;
@@ -48,12 +48,14 @@ public class PrintStreamHandler {
 		logfile.delete();
 		try {
 			logfile.createNewFile();
-		} catch (IOException e1) {
+		}
+		catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		try {
 			logger = new PrintStream(new FileOutputStream(logfile, true));
-		} catch (FileNotFoundException e) {
+		}
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		WrappedSystemOut = new PrintStreamWrapper(SystemOut, "[OUT]");
@@ -83,8 +85,7 @@ public class PrintStreamHandler {
 			prefix = pfix;
 		}
 
-		public PrintStreamWrapper(PrintStream out, boolean autoFlush,
-				String pfix) {
+		public PrintStreamWrapper(PrintStream out, boolean autoFlush, String pfix) {
 			super(out, autoFlush);
 			outputStream = out;
 			prefix = pfix;
@@ -94,9 +95,8 @@ public class PrintStreamHandler {
 			synchronized (this) {
 				outputStream.println(x);
 				outputStream.flush();
-				logger.print("[ "
-						+ (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-								.format(new Date())) + " ] " + prefix + " ");
+				logger.print("[ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) + " ] " + prefix
+						+ " ");
 				logger.println(x);
 			}
 		}
@@ -110,9 +110,7 @@ public class PrintStreamHandler {
 		public void print(String s) {
 			outputStream.print(s);
 			outputStream.flush();
-			logger.print("[ "
-					+ (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-							.format(new Date())) + " ] " + prefix + " ");
+			logger.print("[ " + (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())) + " ] " + prefix + " ");
 			logger.print(s);
 			logger.println();
 		}

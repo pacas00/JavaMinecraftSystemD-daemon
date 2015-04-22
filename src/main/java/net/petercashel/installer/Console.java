@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *******************************************************************************/
+
 package net.petercashel.installer;
 
 import java.io.BufferedReader;
@@ -33,7 +34,8 @@ public class Console {
 		ps.format(out);
 		try {
 			return br.readLine();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			return null;
 		}
 	}
