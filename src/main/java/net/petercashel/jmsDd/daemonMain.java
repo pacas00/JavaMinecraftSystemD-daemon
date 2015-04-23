@@ -114,6 +114,7 @@ public class daemonMain {
 		}
 		// Init modules into classpath so event system can startup.
 		ModuleSystem.loadAllModuleJars();
+		ModuleSystem.LoadFoundModules();
 		eventBus.post(new ModuleConfigEvent(getJSONObject(cfg, "moduleSettings")));
 
 		// init commands

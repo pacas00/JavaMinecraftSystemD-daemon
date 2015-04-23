@@ -60,6 +60,7 @@ public class ModuleSystem {
 	public static HashMap<String, String> modulesToLoad = null;
 
 	public static void loadAllModuleJars() {
+		modulesToLoad = new HashMap<String, String>();
 		File modulesDir = new File(Configuration.configDir, "modules");
 		modulesDir.mkdir();
 		WalkFolder(modulesDir);
@@ -90,7 +91,6 @@ public class ModuleSystem {
 			e3.printStackTrace();
 		}
 		CustomURLClassLoader CustomCL = new CustomURLClassLoader(u);
-		modulesToLoad = new HashMap<String, String>();
 		System.out.println("Inspecting Jar for modules: " + jar.getName());
 		try {
 			ZipInputStream zip = new ZipInputStream(new FileInputStream(jar));
@@ -130,37 +130,40 @@ public class ModuleSystem {
 			}
 		}
 
+		
+
+
+	}
+	
+	public static void LoadFoundModules() {
 		// Process modules to load and null
-		for (Entry<String, String> ent : modulesToLoad.entrySet()) {
-			System.out.println("Initalising Module: " + ent.getKey());
-			Class cls = null;
-			try {
-				cls = Class.forName(ent.getValue());
-			}
-			catch (ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			Constructor<?> cons = null;
-			try {
-				cons = cls.getConstructor(DummyEvent.class);
-			}
-			catch (NoSuchMethodException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				cons.newInstance(new DummyEvent());
-			}
-			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		modulesToLoad = null;
-
+				for (Entry<String, String> ent : modulesToLoad.entrySet()) {
+					System.out.println("Initalising Module: " + ent.getKey());
+					Class cls = null;
+					try {
+						cls = Class.forName(ent.getValue());
+					}
+					catch (ClassNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					Constructor<?> cons = null;
+					try {
+						cons = cls.getConstructor(DummyEvent.class);
+					}
+					catch (NoSuchMethodException | SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					try {
+						cons.newInstance(new DummyEvent());
+					}
+					catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 	}
 }
