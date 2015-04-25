@@ -16,6 +16,7 @@
 
 package net.petercashel.jmsDd.auth;
 
+import net.petercashel.jmsDd.daemonMain;
 import net.petercashel.jmsDd.auth.DataSystems.JsonDataSystem.JsonDataSystem;
 import net.petercashel.jmsDd.auth.interfaces.IAuthDataSystem;
 import static net.petercashel.jmsDd.Configuration.*;
@@ -30,13 +31,19 @@ public class AuthSystem {
 
 		switch (ds) {
 
-			default:
 			case "JsonDataSystem": {
 				backend = new JsonDataSystem();
 				backend.init();
 			}
+			
+			default: {
+				daemonMain.eventBus.post(new AuthSystemInitEvent(ds,backend));
+			}
 
 		}
+		
+		if (backend == null) throw new RuntimeException(" No authentication system could be loaded. \n"
+				+ " This is a serious configuration error and JMSDd must close. \n Attempted to load: " + ds);
 
 	}
 

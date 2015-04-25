@@ -164,6 +164,7 @@ public class Configuration {
 		getDefault(getJSONObject(cfg, "authSettings"), "authenticationSystem", "JsonDataSystem");
 		getJSONObject(cfg, "webSettings");
 		getDefault(getJSONObject(cfg, "webSettings"), "webAPIEnable", true);
+		getJSONObject(cfg, "moduleSettings");
 		saveConfig();
 
 		if (newConfig) {

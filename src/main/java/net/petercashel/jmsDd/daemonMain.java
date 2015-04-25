@@ -59,8 +59,12 @@ import net.petercashel.jmsDd.event.module.ModuleInitEvent;
 import net.petercashel.jmsDd.event.module.ModulePostInitEvent;
 import net.petercashel.jmsDd.event.module.ModulePreInitEvent;
 import net.petercashel.jmsDd.event.module.ModuleShutdownEvent;
+import net.petercashel.jmsDd.event.process.AutoRestartStartEvent;
+import net.petercashel.jmsDd.event.process.AutoRestartStopEvent;
 import net.petercashel.jmsDd.event.process.ProcessRestartEvent;
 import net.petercashel.jmsDd.event.process.ProcessShutdownEvent;
+import net.petercashel.jmsDd.event.process.WatchDogStartEvent;
+import net.petercashel.jmsDd.event.process.WatchDogStopEvent;
 
 public class daemonMain {
 
@@ -71,6 +75,8 @@ public class daemonMain {
 	private static int pid = 0;
 	static boolean runDog = true;
 	static Timer watchdoggy;
+	private static Boolean autoRestart;
+	private static DailyRunnerDaemon AutoRestartDaemon;
 
 	public static void main(String[] args) throws IOException {
 		boolean run = true;
@@ -115,7 +121,8 @@ public class daemonMain {
 		// Init modules into classpath so event system can startup.
 		ModuleSystem.loadAllModuleJars();
 		ModuleSystem.LoadFoundModules();
-		eventBus.post(new ModuleConfigEvent(getJSONObject(cfg, "moduleSettings")));
+		eventBus.register(new daemonMain());
+		eventBus.post(new ModuleConfigEvent());
 
 		// init commands
 		AuthSystem.init();
@@ -182,11 +189,9 @@ public class daemonMain {
 		eventBus.post(new ModuleInitEvent());
 
 		runDog = getDefault(getJSONObject(cfg, "processSettings"), "Watchdog", true);
-
-		if (getDefault(getJSONObject(cfg, "processSettings"), "AutoRestart", true)) {
-			CreateRestartSchedule(getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5),
-					getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0));
-		}
+		autoRestart = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestart", true);
+		
+		eventBus.post(new AutoRestartStartEvent());
 
 		// init minecraft instance
 		if (getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart", true)) RunProcess();
@@ -213,6 +218,25 @@ public class daemonMain {
 				System.gc();
 			}
 		}, 0, 5, TimeUnit.MINUTES);
+	}
+	
+	@Subscribe
+	public static void startAutoRestart(AutoRestartStartEvent autoRestartStartEvent) {
+		if (autoRestart) {
+			CreateRestartSchedule(getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5),
+					getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0));
+		}
+		
+	}
+	
+	@Subscribe
+	public static void stopAutoRestart(AutoRestartStopEvent autoRestartStopEvent) {
+		if (AutoRestartDaemon != null) {
+			AutoRestartDaemon.theTimer.cancel();
+			AutoRestartDaemon.theTimer.purge();
+			AutoRestartDaemon = null;
+		}
+		
 	}
 
 	public static void shutdown() {
@@ -288,7 +312,7 @@ public class daemonMain {
 
 	@Subscribe
 	public static void ShutdownProcess(ProcessShutdownEvent event) throws NullPointerException {
-		if (runDog) {
+		if (runDog && watchdoggy != null) {
 			watchdoggy.cancel();
 			watchdoggy.purge();
 			watchdoggy = null;
@@ -359,11 +383,9 @@ public class daemonMain {
 					}
 				}
 			});
-			if (runDog) {
-				watchdoggy = new Timer();
-				int i = getDefault(getJSONObject(cfg, "processSettings"), "WatchdogMinuteInterval", 5);
-				watchdoggy.schedule(new Watchdog(), i * 60 * 1000);
-			}
+			
+			setupWatchDog(new WatchDogStartEvent());
+			
 			if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
 				/* get the PID on unix/linux systems */
 				try {
@@ -377,7 +399,7 @@ public class daemonMain {
 			}
 			if (p.getClass().getName().equals("java.lang.Win32Process")
 					|| p.getClass().getName().equals("java.lang.ProcessImpl")) {
-				/* determine the pid on windows plattforms */
+				/* determine the pid on windows platforms */
 				try {
 					Field f = p.getClass().getDeclaredField("handle");
 					f.setAccessible(true);
@@ -420,6 +442,24 @@ public class daemonMain {
 		}
 	}
 
+	@Subscribe
+	public static void setupWatchDog(WatchDogStartEvent e) {
+		if (runDog) {
+			watchdoggy = new Timer();
+			int i = getDefault(getJSONObject(cfg, "processSettings"), "WatchdogMinuteInterval", 5);
+			watchdoggy.schedule(new Watchdog(), i * 60 * 1000);
+		}
+		
+	}
+	@Subscribe
+	public static void stopWatchDog(WatchDogStopEvent e) {
+		if (runDog && watchdoggy != null) {
+			watchdoggy.cancel();
+			watchdoggy.purge();
+			watchdoggy = null;
+		}
+	}
+
 	static class Watchdog extends TimerTask {
 
 		@Override
@@ -452,7 +492,7 @@ public class daemonMain {
 		timeOfDay.set(Calendar.MINUTE, m);
 		timeOfDay.set(Calendar.SECOND, 0);
 
-		new DailyRunnerDaemon(timeOfDay, new Runnable() {
+		AutoRestartDaemon = new DailyRunnerDaemon(timeOfDay, new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -468,7 +508,8 @@ public class daemonMain {
 					e.printStackTrace(System.out);
 				}
 			}
-		}, "daily-restart").start();
+		}, "daily-restart");
+		AutoRestartDaemon.start();
 
 	}
 

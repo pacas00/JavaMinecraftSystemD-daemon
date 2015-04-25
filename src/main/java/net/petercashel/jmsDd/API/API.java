@@ -25,25 +25,38 @@ import com.google.gson.JsonObject;
 
 public interface API {
 
+	//StreamIO to client and process
+	
 	PrintStream OutputToClient();
 
 	OutputStream InputToProcess();
 
+	//Load Jar (calls module loader)
+	
 	void LoadJar(File f);
 
+	//Commands
+	
 	void registerCommand(Class<? extends ICommand> com);
 
+	//EventBus
+	
 	EventBus getEventBus();
 
 	void registerEventBus(Object handler);
 
 	void PostEvent(Object event);
 
+	
+	//User
+	
 	boolean HasUser(String u);
 
 	int UserPermissionLevel(String u);
 
 	boolean IsSaltedTokenValid(String user, String SaltToken);
+	
+	//Config
 
 	JsonObject getConfigJSONObject(JsonObject e, String name);
 
@@ -54,6 +67,9 @@ public interface API {
 	String getConfigDefault(JsonObject e, String name, String def);
 
 	File getConfigDir();
+	
+	
+	//The instance to be populated from APICore.
 
 	public static class Impl {
 		public static API api = null;

@@ -16,13 +16,12 @@
 
 package net.petercashel.jmsDd.event.module;
 
+import net.petercashel.jmsDd.Configuration;
 import com.google.gson.JsonObject;
 
 public class ModuleConfigEvent extends EventBase {
 
-	public JsonObject _cfg;
-
-	public ModuleConfigEvent(JsonObject cfg) {
-		this._cfg = cfg;
+	public JsonObject getConfig() {
+		return Configuration.getJSONObject(Configuration.cfg, "moduleSettings");
 	}
 }

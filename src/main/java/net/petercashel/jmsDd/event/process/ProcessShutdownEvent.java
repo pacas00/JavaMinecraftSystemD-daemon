@@ -16,6 +16,8 @@
 
 package net.petercashel.jmsDd.event.process;
 
-public class ProcessShutdownEvent {
+import net.petercashel.jmsDd.event.module.EventBase;
+
+public class ProcessShutdownEvent extends EventBase {
 
 }

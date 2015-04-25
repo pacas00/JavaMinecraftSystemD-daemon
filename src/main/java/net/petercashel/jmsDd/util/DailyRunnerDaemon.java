@@ -28,6 +28,7 @@ public class DailyRunnerDaemon {
 	private final int minute;
 	private final int second;
 	private final String runThreadName;
+	public Timer theTimer;
 
 	public DailyRunnerDaemon(Calendar timeOfDay, Runnable dailyTask, String runThreadName) {
 		this.dailyTask = dailyTask;
@@ -42,7 +43,8 @@ public class DailyRunnerDaemon {
 	}
 
 	private void startTimer() {
-		new Timer(runThreadName, true).schedule(new TimerTask() {
+		theTimer = new Timer(runThreadName, true);
+		theTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				dailyTask.run();
