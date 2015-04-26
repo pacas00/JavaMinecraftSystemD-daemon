@@ -251,8 +251,14 @@ public class installMain {
 		}
 
 		client.setExecutable(true);
+		try {
+			Runtime.getRuntime().exec(new String[] { "chown", username, client.toPath().toString() });
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+		}		
 		libc.chmod(client.toPath().toString(), 0750);
-
+		
 		try {
 			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable", "JMSDd.service");
 			pb1.redirectOutput(Redirect.PIPE);
