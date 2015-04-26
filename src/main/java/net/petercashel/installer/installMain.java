@@ -212,6 +212,7 @@ public class installMain {
 		}
 		File jar = new File(decodedPath);
 		File target = new File(installDir, "JMSDd-daemon.jar");
+		target.delete();
 		try {
 			Files.copy(jar.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
