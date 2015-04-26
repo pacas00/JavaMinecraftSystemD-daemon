@@ -34,10 +34,12 @@ public class AuthSystem {
 			case "JsonDataSystem": {
 				backend = new JsonDataSystem();
 				backend.init();
+				break;
 			}
 			
 			default: {
-				daemonMain.eventBus.post(new AuthSystemInitEvent(ds,backend));
+				daemonMain.eventBus.post(new AuthSystemInitEvent(ds));
+				break;
 			}
 
 		}

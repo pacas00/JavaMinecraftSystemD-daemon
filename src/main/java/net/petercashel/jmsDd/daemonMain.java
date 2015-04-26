@@ -36,6 +36,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.sun.jna.Pointer;
@@ -61,6 +62,7 @@ import net.petercashel.jmsDd.event.module.ModulePreInitEvent;
 import net.petercashel.jmsDd.event.module.ModuleShutdownEvent;
 import net.petercashel.jmsDd.event.process.AutoRestartStartEvent;
 import net.petercashel.jmsDd.event.process.AutoRestartStopEvent;
+import net.petercashel.jmsDd.event.process.ProcessPreRestartEvent;
 import net.petercashel.jmsDd.event.process.ProcessRestartEvent;
 import net.petercashel.jmsDd.event.process.ProcessShutdownEvent;
 import net.petercashel.jmsDd.event.process.WatchDogStartEvent;
@@ -119,9 +121,9 @@ public class daemonMain {
 
 		}
 		// Init modules into classpath so event system can startup.
+		eventBus.register(new daemonMain());
 		ModuleSystem.loadAllModuleJars();
 		ModuleSystem.LoadFoundModules();
-		eventBus.register(new daemonMain());
 		eventBus.post(new ModuleConfigEvent());
 
 		// init commands
@@ -318,6 +320,7 @@ public class daemonMain {
 			watchdoggy = null;
 		}
 
+		eventBus.post(new AutoRestartStopEvent());
 		if (pHasStopCmd) {
 			String s = Configuration.getDefault(Configuration.getJSONObject(Configuration.cfg, "processSettings"),
 					"processShutdownCommand", "") + System.lineSeparator();
@@ -343,6 +346,9 @@ public class daemonMain {
 
 	private static void RunProcess() {
 		while (daemonMain.run) {
+			
+			eventBus.post(new AutoRestartStartEvent());
+			
 			List<String> strings = new ArrayList<String>();
 			strings.add(Configuration.getDefault(Configuration.getJSONObject(Configuration.cfg, "processSettings"),
 					"processExcecutable", ""));
@@ -515,8 +521,14 @@ public class daemonMain {
 
 	protected static void AutoRestart(int h, int m) {
 		while (daemonMain.run) {
+			eventBus.post(new ProcessPreRestartEvent());
 			eventBus.post(new ProcessRestartEvent());
 			CreateRestartSchedule(h, m);
 		}
+	}
+	
+	@Subscribe
+	public static void DeadEventHandler(DeadEvent e) {
+		System.out.println("DeadEvent fired for event " + e.getEvent().toString() + " .");
 	}
 }
