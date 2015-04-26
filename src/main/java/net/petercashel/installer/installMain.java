@@ -47,11 +47,23 @@ public class installMain {
 		PrintStream out = System.out;
 
 		out.println("Enter the username to run the daemon as.");
-		out.println("[Press enter for default of root]");
+		out.println("[Press enter for default of root. !NOT RECOMMENDED! ]");
 		String username = c.readLine("Username: ");
 		out.println();
 		if (username.isEmpty() || username.equalsIgnoreCase("") || username == null) {
 			rootInstall = true;
+		}
+		if (rootInstall) {
+			out.println("*!*");
+			out.println("*!* Running as root is a VERY BAD IDEA ");
+			out.println("*!* Recommended installation is to have a seperate User and Group for security");
+			out.println("*!* Owner User gets by default Read, Write and Execute Permission");
+			out.println("*!* Group (not chowned by installer) gets Read and Execute");
+			out.println("*!* Others get no permissions");
+			out.println("*!* ");
+			out.println("*!* Consider creating a dedicated user and group");
+			out.println("*!* ");
+
 		}
 
 		out.println("Enter the desired installation path.");
@@ -215,7 +227,7 @@ public class installMain {
 		PrintStream p1 = new PrintStream(o1, true);
 
 		p1.println("#!/bin/bash");
-		p1.println("java -cp " + target.toPath().toString() + " net.petercashel.jmsDc.clientMain");
+		p1.println("java -cp " + target.toPath().toString() + " net.petercashel.jmsDd.DepLoader client");
 		p1.println();
 
 		p1.flush();
@@ -234,42 +246,50 @@ public class installMain {
 		}
 
 		client.setExecutable(true);
-		libc.chmod(client.toPath().toString(), 0777);
+		libc.chmod(client.toPath().toString(), 0750);
 
-		ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable", "JMSDd.service");
-		pb1.redirectOutput(Redirect.PIPE);
-		Process ps1 = null;
 		try {
-			ps1 = pb1.start();
-		}
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			ps1.waitFor();
-		}
-		catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "enable", "JMSDd.service");
+			pb1.redirectOutput(Redirect.PIPE);
+			Process ps1 = null;
+			try {
+				ps1 = pb1.start();
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				ps1.waitFor();
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		} catch (Exception e_noSYSTEMD) {
+
 		}
 
-		ProcessBuilder pb2 = new ProcessBuilder("systemctl", "start", "JMSDd.service");
-		pb2.redirectOutput(Redirect.PIPE);
-		Process ps2 = null;
 		try {
-			ps2 = pb1.start();
-		}
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			ps2.waitFor();
-		}
-		catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ProcessBuilder pb2 = new ProcessBuilder("systemctl", "start", "JMSDd.service");
+			pb2.redirectOutput(Redirect.PIPE);
+			Process ps2 = null;
+			try {
+				ps2 = pb2.start();
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				ps2.waitFor();
+			}
+			catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (Exception e_noSYSTEMD) {
+
 		}
 
 		Path p11 = installDir.toPath();
@@ -277,7 +297,7 @@ public class installMain {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println(file);
-				libc.chmod(file.toString(), 0777);
+				libc.chmod(file.toString(), 0750);
 				return FileVisitResult.CONTINUE;
 			}
 		};
