@@ -1,0 +1,137 @@
+#!/bin/bash
+# /etc/init.d/JMSDd
+# version 1.0.0 2015-04-26 (YYYY-MM-DD)
+#
+#   Authors:    Nicholas Meredith   (udha)
+#               Peter Cashel        (pacas00)
+#
+### SETTINGS
+
+# Name of server.jar file
+SERVICE='JMSDd-daemon.jar'
+# User that should run the server
+USERNAME="peter"
+# Screen daemon name to use
+SCREENNAME=JMSDd
+# Path to service directory excluding the last ex: /home/v/mine
+SVPATH='/usr/share/JMSDd'
+MaxRam=256M
+MinRam=32M
+INVOCATION="java -d64 -server -Xmx$MaxRam -Xms$MinRam -Djline.terminal=jline.UnsupportedTerminal -jar $SERVICE"
+
+ME=`whoami`
+as_user() {
+if [ $ME == $USERNAME ]; then
+	bash -c "$1"
+else
+	su - $USERNAME -c "$1"
+fi
+}
+
+sv_start() {
+if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+  then
+    echo "$SERVICE is already running!"
+  else
+    echo "Starting $SERVICE..."
+    cd $SVPATH
+    as_user "cd $SVPATH && screen -dmS $SCREENNAME $INVOCATION"
+    sleep 7
+fi
+if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+    then
+      echo "$SERVICE is now running."
+    else
+      echo "Error! Could not start $SERVICE!"
+    fi
+}
+
+sv_stop() {
+    echo "Stopping Process";
+    kill 2 $servicepid
+	sleep 15
+	if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+    then
+      echo "Error! Could not stop $SERVICE!"
+    else
+      echo "$SERVICE has stopped."
+    fi
+}
+
+sv_forcestop() {
+    echo "Force Stopping Process";
+    kill -9 $servicepid
+}
+
+get_pid() {
+servicepid=` ps -f -u $USERNAME | awk '/'"$SERVICE"'/ && !/dmS/ && /java/ {print$2 }'`
+}
+
+write_pid() {
+echo $servicepid > $SVPATH/pid.pid
+}
+
+read_pid() {
+if [ -f $SVPATH/pid.pid ];
+then
+servicepid=$(cat ${SVPATH}/pid.pid)
+fi
+}
+
+del_pid() {
+rm ${SVPATH}/pid.pid
+}
+
+case "$1" in
+start)
+# Starts the server
+#to_ram
+sv_start
+get_pid
+write_pid
+;;
+stop)
+# Stops the server
+sv_stop
+del_pid
+;;
+forcestop)
+# Kills the Process using the new PID
+del_pid
+get_pid
+write_pid
+sv_forcestop
+del_pid
+;;
+restart)
+# Restarts the server
+sv_stop
+del_pid
+sv_start
+get_pid
+write_pid
+;;
+watchdog)
+if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+then
+        echo "$SERVICE is running."
+else
+        if [ ! -f $SVPATH/updating ];
+        then
+                echo "$SERVICE is being started again."
+                sv_start
+        fi
+fi
+;;
+status)
+# Shows server status
+if ps ax | grep -v grep | grep -v -i SCREEN | grep $SERVICE > /dev/null
+then
+	echo "$SERVICE is running."
+else
+	echo "$SERVICE is not running."
+fi
+;;
+esac
+
+exit 0

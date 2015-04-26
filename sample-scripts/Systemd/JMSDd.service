@@ -1,0 +1,10 @@
+[Unit]
+Description=JMSDd
+
+[Service]
+ExecStart=/usr/bin/java -jar /usr/share/JMSDd/JMSDd-daemon.jar
+User=peter
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
