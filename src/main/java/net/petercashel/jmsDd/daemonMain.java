@@ -388,8 +388,8 @@ public class daemonMain {
 							while (daemonMain.run) {
 								while (sc.hasNextLine()) {
 									String s = sc.nextLine();
-									commandServer.out.println(s);
 									System.out.println(s);
+									commandServer.out.println(s);
 								}
 							}
 						}

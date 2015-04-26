@@ -90,6 +90,7 @@ public class commandServer {
 					sc = new Scanner((pipein));
 					while (sc.hasNextLine()) {
 						String s = sc.nextLine();
+						System.out.println(s);
 						// Add to queue here
 						history.offer(s);
 						if (history.size() > historylimit) history.poll();
