@@ -156,7 +156,7 @@ public class installMain {
 		}
 		FileOutputStream o = null;
 		try {
-			o = new FileOutputStream(service, true);
+			o = new FileOutputStream(service, false);
 		}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -252,7 +252,7 @@ public class installMain {
 
 		client.setExecutable(true);
 		try {
-			Runtime.getRuntime().exec(new String[] { "chown", username, client.toPath().toString() });
+			Runtime.getRuntime().exec(new String[] { "chown", username, target.toPath().toString() });
 		}
 		catch (Exception e1) {
 			e1.printStackTrace();
