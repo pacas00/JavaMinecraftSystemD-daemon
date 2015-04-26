@@ -130,25 +130,29 @@ public class installMain {
 			System.exit(1);
 		}
 		File service = new File(serviceDir, "JMSDd.service");
-		if (service.exists()) {
-			ProcessBuilder pb1 = new ProcessBuilder("systemctl", "disable", "JMSDd.service");
-			pb1.redirectOutput(Redirect.PIPE);
-			Process ps1 = null;
-			try {
-				ps1 = pb1.start();
+		try {
+			if (service.exists()) {
+				ProcessBuilder pb1 = new ProcessBuilder("systemctl", "disable", "JMSDd.service");
+				pb1.redirectOutput(Redirect.PIPE);
+				Process ps1 = null;
+				try {
+					ps1 = pb1.start();
+				}
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					ps1.waitFor();
+				}
+				catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				service.delete();
 			}
-			catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				ps1.waitFor();
-			}
-			catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			service.delete();
+		} catch (Exception e_noSYSTEMD) {
+
 		}
 		FileOutputStream o = null;
 		try {
