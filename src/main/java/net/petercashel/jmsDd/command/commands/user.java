@@ -86,6 +86,7 @@ public class user implements ICommand {
 			return;
 		}
 		AuthSystem.backend.SetPermissionLevel(args[2], Integer.parseInt(args[3]));
+		AuthSystem.backend.save();
 		commandServer.out.println("Set perm level on user " + args[2]);
 
 	}
@@ -97,6 +98,7 @@ public class user implements ICommand {
 			return;
 		}
 		AuthSystem.backend.ResetTokenSalt(args[2]);
+		AuthSystem.backend.save();
 		commandServer.out.println("TokenSalt reset for user " + args[2]);
 	}
 
@@ -107,6 +109,7 @@ public class user implements ICommand {
 			return;
 		}
 		AuthSystem.backend.ResetToken(args[2]);
+		AuthSystem.backend.save();
 		commandServer.out.println("Token reset for user " + args[2]);
 	}
 
@@ -123,6 +126,7 @@ public class user implements ICommand {
 		}
 		if (args[3].equalsIgnoreCase("y")) {
 			AuthSystem.backend.DelUser(args[2]);
+			AuthSystem.backend.save();
 			commandServer.out.println("Deleted user " + args[2]);
 		}
 
@@ -136,6 +140,7 @@ public class user implements ICommand {
 		}
 		try {
 			AuthSystem.backend.AddUser(args[2]);
+			AuthSystem.backend.save();
 			commandServer.out.println("User " + args[2] + " Added!");
 		}
 		catch (Exception e) {

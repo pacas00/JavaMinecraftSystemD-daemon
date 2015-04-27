@@ -59,6 +59,10 @@ public class process implements ICommand {
 			daemonMain.eventBus.post(new ProcessShutdownEvent());
 			return true;
 		}
+		if (args[1].equalsIgnoreCase("kill")) {
+			daemonMain.KillProcess();
+			return true;
+		}
 		return false;
 	}
 
