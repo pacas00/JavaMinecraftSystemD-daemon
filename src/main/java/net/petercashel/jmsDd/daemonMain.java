@@ -525,6 +525,7 @@ public class daemonMain {
 
 	protected static void AutoRestart(int h, int m) {
 		while (daemonMain.run) {
+			eventBus.post(new ProcessShutdownEvent());
 			eventBus.post(new ProcessPreRestartEvent());
 			eventBus.post(new ProcessRestartEvent());
 			CreateRestartSchedule(h, m);
