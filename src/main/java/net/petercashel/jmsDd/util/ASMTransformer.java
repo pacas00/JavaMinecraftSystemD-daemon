@@ -43,13 +43,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public class ASMTransformer {
 	static List<ASMPlugin> plugins = new ArrayList<ASMPlugin>();
+	public final static boolean debug = false;
 	
 	public static void addASMPlugin (ASMPlugin plug) {
 		plugins.add(plug);
 	}
 
 	public static byte[] transform(String name, byte[] bytes) {
-		final boolean debug = false;
 		if (debug) System.out.println(bytes.length);
 		ClassNode classNode = new ClassNode();
 		String classNameASM = name.replace('.', '/');

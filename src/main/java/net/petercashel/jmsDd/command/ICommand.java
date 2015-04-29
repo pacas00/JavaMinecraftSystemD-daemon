@@ -26,6 +26,8 @@ public interface ICommand {
 
 	public permissionLevels requiredPermissionLevel();
 
-	public void RegisterMe();
+	public default void RegisterMe() {
+		commandServer.registerCommand(this.getClass());
+	}
 
 }
