@@ -16,6 +16,7 @@
 
 package net.petercashel.jmsDd.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,11 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 public class ASMTransformer {
+	static List<ASMPlugin> plugins = new ArrayList<ASMPlugin>();
+	
+	public static void addASMPlugin (ASMPlugin plug) {
+		plugins.add(plug);
+	}
 
 	public static byte[] transform(String name, byte[] bytes) {
 		final boolean debug = false;
@@ -55,8 +61,6 @@ public class ASMTransformer {
 		boolean lockDesc = false;
 
 		try {
-
-
 			try {
 				for (int i = 0; i < classNode.visibleAnnotations.size(); i++) {
 					AnnotationNode ann = (AnnotationNode) classNode.visibleAnnotations.get(i);
@@ -76,7 +80,6 @@ public class ASMTransformer {
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
 			}
 
 			try {
@@ -189,6 +192,16 @@ public class ASMTransformer {
 		}
 		if (debug) System.out.println("Still alive.");
 		if (debug) System.out.println(bytes.length);
+		if (plugins.size() > 0) {
+			for (ASMPlugin p : plugins) {
+				try {
+					bytes = p.transform(name, bytes);
+				} catch (Exception e) {
+					
+				}
+			}
+		}
+		
 		return bytes;
 	}
 
