@@ -57,6 +57,7 @@ $RECYCLE.BIN/
 *.lnk
 /Libs/
 
-.classpath
-*.classpath
-.classpath
+/installLib/
+
+path.txt
+htb3-installer.jar
