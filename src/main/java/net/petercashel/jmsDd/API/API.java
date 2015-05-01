@@ -19,6 +19,7 @@ package net.petercashel.jmsDd.API;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import org.quartz.Scheduler;
 import net.petercashel.jmsDd.command.ICommand;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonObject;
@@ -47,6 +48,8 @@ public interface API {
 
 	void PostEvent(Object event);
 
+	//Quartz Scheduler
+	Scheduler getQuartSched();
 	
 	//User
 	

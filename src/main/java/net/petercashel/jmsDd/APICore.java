@@ -19,6 +19,7 @@ package net.petercashel.jmsDd;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import org.quartz.Scheduler;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonObject;
 import net.petercashel.jmsDd.API.API;
@@ -65,6 +66,12 @@ public class APICore implements API {
 	}
 
 	@Override
+	public Scheduler getQuartSched() {
+		// TODO Auto-generated method stub
+		return daemonMain.quartzSched;
+	};
+
+	@Override
 	public boolean HasUser(String u) {
 		return AuthSystem.backend.HasUser(u);
 	}
@@ -102,5 +109,5 @@ public class APICore implements API {
 	@Override
 	public File getConfigDir() {
 		return Configuration.configDir;
-	};
+	}
 }
