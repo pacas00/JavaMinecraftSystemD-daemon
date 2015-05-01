@@ -262,7 +262,14 @@ public class installMain {
 		}
 
 		client.setExecutable(true);
-				
+		try {
+			ProcessBuilder chownpb = new ProcessBuilder("chown", username, client.toPath().toString());
+			Process chown = chownpb.start();
+			chown.waitFor();
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+		}		
 		libc.chmod(client.toPath().toString(), 0750);
 		
 		try {
