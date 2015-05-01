@@ -36,12 +36,14 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
+
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.commonlib.util.OS_Util;
 import net.petercashel.jmsDd.API.API;
@@ -496,6 +498,23 @@ public class daemonMain {
 
 	}
 
+	public static boolean ProcessRunning() {
+		try {
+			// p is null on start, so assume p being null means not running.
+			if (p != null) {
+				// Process never has an exitcode when running and therefore
+				// throws
+				int i = p.exitValue();
+			}
+			// If we get here, it died
+			return false;
+		}
+		catch (IllegalThreadStateException e) {
+			return true;
+		}
+
+	}
+
 	static void CreateRestartSchedule(final int h, final int m) {
 		Calendar timeOfDay = Calendar.getInstance();
 		timeOfDay.set(Calendar.HOUR_OF_DAY, h);
@@ -525,10 +544,34 @@ public class daemonMain {
 
 	protected static void AutoRestart(int h, int m) {
 		while (daemonMain.run) {
-			eventBus.post(new ProcessShutdownEvent());
-			eventBus.post(new ProcessPreRestartEvent());
-			eventBus.post(new ProcessRestartEvent());
-			CreateRestartSchedule(h, m);
+			try {
+				if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
+				while (ProcessRunning()) {
+					try {
+						Thread.sleep(1000L);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+
+			}
+			try {
+				eventBus.post(new ProcessPreRestartEvent());
+			} catch (Exception e) {
+
+			}
+			try {
+				eventBus.post(new ProcessRestartEvent());
+			} catch (Exception e) {
+
+			}
+			try {
+				CreateRestartSchedule(h, m);
+			} catch (Exception e) {
+
+			}
 		}
 	}
 
