@@ -41,6 +41,10 @@ public class DepLoaderStage2 {
 					"jna", "", "jar", "4.1.0"), "runtime"));
 			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("net.java.dev.jna",
 					"jna-platform", "", "jar", "4.1.0"), "runtime"));
+			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("org.quartz-scheduler",
+					"quartz", "", "jar", "2.2.1"), "runtime"));
+			deps.addAll(resolver.resolve(new org.sonatype.aether.util.artifact.DefaultArtifact("org.quartz-scheduler",
+					"quartz-jobs", "", "jar", "2.2.1"), "runtime"));
 
 			for (org.sonatype.aether.artifact.Artifact a : deps) {
 				try {

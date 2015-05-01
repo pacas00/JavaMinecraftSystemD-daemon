@@ -36,21 +36,30 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
+import org.quartz.CronScheduleBuilder;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.ScheduleBuilder;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
-
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.commonlib.util.OS_Util;
 import net.petercashel.jmsDd.API.API;
 import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commandServer;
 import net.petercashel.jmsDd.module.ModuleSystem;
-import net.petercashel.jmsDd.util.DailyRunnerDaemon;
+import net.petercashel.jmsDd.util.AutoRestartJob;
 import net.petercashel.jmsDd.util.PrintStreamHandler;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
@@ -80,8 +89,9 @@ public class daemonMain {
 	static boolean runDog = true;
 	static Timer watchdoggy;
 	private static Boolean autoRestart;
-	private static DailyRunnerDaemon AutoRestartDaemon;
 	private static ScheduledExecutorService service;
+	public static Scheduler quartzSched = null;
+	private static JobKey AutoRestartJobKey;
 
 	public static void main(String[] args) throws IOException {
 		boolean run = true;
@@ -125,6 +135,22 @@ public class daemonMain {
 		}
 		// Init modules into classpath so event system can startup.
 		eventBus.register(new daemonMain());
+		SchedulerFactory sf = new StdSchedulerFactory();
+		try {
+			quartzSched = sf.getScheduler();
+		}
+		catch (SchedulerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			quartzSched.start();
+		}
+		catch (SchedulerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		ModuleSystem.loadAllModuleJars();
 		ModuleSystem.LoadFoundModules();
 		eventBus.post(new ModuleConfigEvent());
@@ -222,24 +248,47 @@ public class daemonMain {
 			public void run() {
 				System.gc();
 			}
-		}, 5, 5, TimeUnit.MINUTES);
+		}, 5, 15, TimeUnit.MINUTES);
 	}
 
 	@Subscribe
 	public static void startAutoRestart(AutoRestartStartEvent autoRestartStartEvent) {
 		if (autoRestart) {
-			CreateRestartSchedule(getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5),
-					getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0));
+					
+			int h = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5);
+			int m = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0);
+			
+			JobDetail job = JobBuilder.newJob(AutoRestartJob.class)  
+				    .withIdentity("AutoRestartJob", "AutoRestartJob")  
+				    .build();
+			AutoRestartJobKey = job.getKey();
+			// Schedule to run at 5 AM every day
+	        ScheduleBuilder scheduleBuilder = 
+	                CronScheduleBuilder.cronSchedule("0 " + m + " " + h + " * * ?");
+	        Trigger trigger = TriggerBuilder.newTrigger().
+	                withSchedule(scheduleBuilder).build();
+	        
+	        try {
+				quartzSched.scheduleJob(job, trigger);
+			}
+			catch (SchedulerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
 
 	@Subscribe
 	public static void stopAutoRestart(AutoRestartStopEvent autoRestartStopEvent) {
-		if (AutoRestartDaemon != null) {
-			AutoRestartDaemon.theTimer.cancel();
-			AutoRestartDaemon.theTimer.purge();
-			AutoRestartDaemon = null;
+		try {
+			if (quartzSched.checkExists(AutoRestartJobKey)) {
+				quartzSched.deleteJob(AutoRestartJobKey);
+			}
+		}
+		catch (SchedulerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
@@ -247,10 +296,21 @@ public class daemonMain {
 	public static void shutdown() {
 		run = false;
 		saveConfig();
-		if (AutoRestartDaemon != null) {
-			AutoRestartDaemon.theTimer.cancel();
-			AutoRestartDaemon.theTimer.purge();
-			AutoRestartDaemon = null;
+		try {
+			quartzSched.pauseAll();
+		}
+		catch (SchedulerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			if (quartzSched.checkExists(AutoRestartJobKey)) {
+				quartzSched.deleteJob(AutoRestartJobKey);
+			}
+		}
+		catch (SchedulerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		if (runDog && watchdoggy != null) {
 			watchdoggy.cancel();
@@ -266,6 +326,13 @@ public class daemonMain {
 		}
 		serverCore.shutdown();
 		serverCoreUDS.shutdown();
+		try {
+			quartzSched.shutdown();
+		}
+		catch (SchedulerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		threadManager.getInstance().shutdown();		
 	}
 
@@ -515,34 +582,7 @@ public class daemonMain {
 
 	}
 
-	static void CreateRestartSchedule(final int h, final int m) {
-		Calendar timeOfDay = Calendar.getInstance();
-		timeOfDay.set(Calendar.HOUR_OF_DAY, h);
-		timeOfDay.set(Calendar.MINUTE, m);
-		timeOfDay.set(Calendar.SECOND, 0);
-
-		AutoRestartDaemon = new DailyRunnerDaemon(timeOfDay, new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// call whatever your daily task is here
-					while (daemonMain.run) {
-						AutoRestart(h, m);
-					}
-				}
-				catch (Exception e) {
-					commandServer.out.println("An error occurred performing daily restart");
-					System.out.println("An error occurred performing daily restart");
-					e.printStackTrace(commandServer.out);
-					e.printStackTrace(System.out);
-				}
-			}
-		}, "daily-restart");
-		AutoRestartDaemon.start();
-
-	}
-
-	protected static void AutoRestart(int h, int m) {
+	public static void AutoRestart() {
 		while (daemonMain.run) {
 			try {
 				if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
@@ -564,11 +604,6 @@ public class daemonMain {
 			}
 			try {
 				eventBus.post(new ProcessRestartEvent());
-			} catch (Exception e) {
-
-			}
-			try {
-				CreateRestartSchedule(h, m);
 			} catch (Exception e) {
 
 			}
