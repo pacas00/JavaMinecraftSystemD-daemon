@@ -150,7 +150,7 @@ public class daemonMain {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		ModuleSystem.loadAllModuleJars();
 		ModuleSystem.LoadFoundModules();
 		eventBus.post(new ModuleConfigEvent());
@@ -254,21 +254,21 @@ public class daemonMain {
 	@Subscribe
 	public static void startAutoRestart(AutoRestartStartEvent autoRestartStartEvent) {
 		if (autoRestart) {
-					
+
 			int h = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5);
 			int m = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0);
-			
+
 			JobDetail job = JobBuilder.newJob(AutoRestartJob.class)  
-				    .withIdentity("AutoRestartJob", "AutoRestartJob")  
-				    .build();
+					.withIdentity("AutoRestartJob", "AutoRestartJob")  
+					.build();
 			AutoRestartJobKey = job.getKey();
 			// Schedule to run at 5 AM every day
-	        ScheduleBuilder scheduleBuilder = 
-	                CronScheduleBuilder.cronSchedule("0 " + m + " " + h + " * * ?");
-	        Trigger trigger = TriggerBuilder.newTrigger().
-	                withSchedule(scheduleBuilder).build();
-	        
-	        try {
+			ScheduleBuilder scheduleBuilder = 
+					CronScheduleBuilder.cronSchedule("0 " + m + " " + h + " * * ?");
+			Trigger trigger = TriggerBuilder.newTrigger().
+					withSchedule(scheduleBuilder).build();
+
+			try {
 				quartzSched.scheduleJob(job, trigger);
 			}
 			catch (SchedulerException e) {
@@ -583,31 +583,30 @@ public class daemonMain {
 	}
 
 	public static void AutoRestart() {
-		while (daemonMain.run) {
-			try {
-				if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
-				while (ProcessRunning()) {
-					try {
-						Thread.sleep(1000L);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+		try {
+			if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
+			while (ProcessRunning()) {
+				try {
+					Thread.sleep(1000L);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-
 			}
-			try {
-				eventBus.post(new ProcessPreRestartEvent());
-			} catch (Exception e) {
+		} catch (Exception e) {
 
-			}
-			try {
-				eventBus.post(new ProcessRestartEvent());
-			} catch (Exception e) {
-
-			}
 		}
+		try {
+			eventBus.post(new ProcessPreRestartEvent());
+		} catch (Exception e) {
+
+		}
+		try {
+			eventBus.post(new ProcessRestartEvent());
+		} catch (Exception e) {
+
+		}
+
 	}
 
 	@Subscribe
