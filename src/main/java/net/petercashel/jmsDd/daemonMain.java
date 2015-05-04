@@ -262,6 +262,17 @@ public class daemonMain {
 			JobDetail job = JobBuilder.newJob(AutoRestartJob.class)  
 					.withIdentity("AutoRestartJob", "AutoRestartJob")  
 					.build();
+			try {
+				if (quartzSched.checkExists(AutoRestartJobKey)) {
+					quartzSched.deleteJob(AutoRestartJobKey);
+					quartzSched.triggerJob(AutoRestartJobKey);
+				}
+			}
+			catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			AutoRestartJobKey = job.getKey();
 			// Schedule to run at 5 AM every day
 			ScheduleBuilder scheduleBuilder = 
