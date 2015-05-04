@@ -76,6 +76,7 @@ import net.petercashel.jmsDd.event.process.AutoRestartStopEvent;
 import net.petercashel.jmsDd.event.process.ProcessPreRestartEvent;
 import net.petercashel.jmsDd.event.process.ProcessRestartEvent;
 import net.petercashel.jmsDd.event.process.ProcessShutdownEvent;
+import net.petercashel.jmsDd.event.process.ProcessStartEvent;
 import net.petercashel.jmsDd.event.process.WatchDogStartEvent;
 import net.petercashel.jmsDd.event.process.WatchDogStopEvent;
 
@@ -346,20 +347,13 @@ public class daemonMain {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		try {
-			// p is null on start, so assume p being null means not running.
-			if (p != null) {
-				// Process never has an exitcode when running and therefore
-				// throws
-				int i = p.exitValue();
-			}
-			// If we get here, it died
+		eventBus.post(new ProcessStartEvent());
+		
+		
+	}
+	@Subscribe
+	public static void StartProcess(ProcessStartEvent event) {
 			RunProcess();
-		}
-		catch (IllegalThreadStateException e) {
-			e.printStackTrace();
-			System.out.println("Failed to restart process");
-		}
 	}
 
 	@Subscribe
@@ -602,7 +596,7 @@ public class daemonMain {
 
 		}
 		try {
-			eventBus.post(new ProcessRestartEvent());
+			eventBus.post(new ProcessStartEvent());
 		} catch (Exception e) {
 
 		}
