@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -60,6 +62,7 @@ import net.petercashel.jmsDd.auth.AuthSystem;
 import net.petercashel.jmsDd.command.commandServer;
 import net.petercashel.jmsDd.module.ModuleSystem;
 import net.petercashel.jmsDd.util.AutoRestartJob;
+import net.petercashel.jmsDd.util.LogRotateJob;
 import net.petercashel.jmsDd.util.PrintStreamHandler;
 import net.petercashel.nettyCore.server.serverCore;
 import net.petercashel.nettyCore.serverUDS.serverCoreUDS;
@@ -93,6 +96,7 @@ public class daemonMain {
 	private static ScheduledExecutorService service;
 	public static Scheduler quartzSched = null;
 	private static JobKey AutoRestartJobKey;
+	public static DateFormat logDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
 	public static void main(String[] args) throws IOException {
 		boolean run = true;
@@ -225,7 +229,7 @@ public class daemonMain {
 
 		eventBus.post(new AutoRestartStartEvent());
 
-		// init minecraft instance
+		// init process
 		if (getDefault(getJSONObject(cfg, "processSettings"), "processAutoStart", true)) RunProcess();
 
 		pHasStopCmd = Configuration.getDefault(Configuration.getJSONObject(Configuration.cfg, "processSettings"),
@@ -241,8 +245,24 @@ public class daemonMain {
 		}));
 		eventBus.post(new ModulePostInitEvent());
 
+		try {
+			//Log Rotate
+			JobDetail job = JobBuilder.newJob(LogRotateJob.class)  
+					.withIdentity("LogRotate", "LogRotate")  
+					.build();
+			// Schedule to run at 12 AM every day
+			ScheduleBuilder scheduleBuilder = 
+					CronScheduleBuilder.cronSchedule("0 " + 0 + " " + 0 + " * * ?");
+			Trigger trigger = TriggerBuilder.newTrigger().
+					withSchedule(scheduleBuilder).build();
+			quartzSched.scheduleJob(job, trigger);
+		}
+		catch (SchedulerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Every 5 mins do garbage cleanup
-
 		service = Executors.newSingleThreadScheduledExecutor();
 		service.scheduleWithFixedDelay(new Runnable() {
 			@Override
@@ -259,8 +279,9 @@ public class daemonMain {
 			int h = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5);
 			int m = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0);
 
+			String date = logDateFormat.format(Calendar.getInstance().getTime());
 			JobDetail job = JobBuilder.newJob(AutoRestartJob.class)  
-					.withIdentity("AutoRestartJob", "AutoRestartJob")  
+					.withIdentity("AutoRestartJob"+date, "AutoRestartJob")  
 					.build();
 			try {
 				if (quartzSched.checkExists(AutoRestartJobKey)) {

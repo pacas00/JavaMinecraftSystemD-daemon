@@ -24,10 +24,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 import net.petercashel.commonlib.threading.threadManager;
 import net.petercashel.jmsDd.Configuration;
+import net.petercashel.jmsDd.daemonMain;
 import net.petercashel.jmsDd.command.commandServer;
 import static net.petercashel.jmsDd.command.commandServer.out;
 
@@ -44,7 +46,9 @@ public class PrintStreamHandler {
 	public static void run() {
 		SystemOut = System.out;
 		SystemErr = System.err;
-		File logfile = new File(Configuration.configDir, "JMSDd.log");
+		String date = daemonMain.logDateFormat.format(Calendar.getInstance().getTime());
+		
+		File logfile = new File(Configuration.configDir, "JMSDd-" + date + ".log");
 		logfile.delete();
 		try {
 			logfile.createNewFile();
@@ -62,6 +66,26 @@ public class PrintStreamHandler {
 		WrappedSystemErr = new PrintStreamWrapper(SystemErr, "[ERR]");
 		System.setOut(WrappedSystemOut);
 		System.setErr(WrappedSystemErr);
+	}
+	public static void logRotate() {
+		logger.flush();
+		logger.close();
+		String date = daemonMain.logDateFormat.format(Calendar.getInstance().getTime());
+		
+		File logfile = new File(Configuration.configDir, "JMSDd-" + date + ".log");
+		logfile.delete();
+		try {
+			logfile.createNewFile();
+		}
+		catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			logger = new PrintStream(new FileOutputStream(logfile, true));
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	static class PrintStreamWrapper extends PrintStream {
