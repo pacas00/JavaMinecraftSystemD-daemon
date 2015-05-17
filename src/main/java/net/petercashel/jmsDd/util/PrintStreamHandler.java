@@ -47,8 +47,9 @@ public class PrintStreamHandler {
 		SystemOut = System.out;
 		SystemErr = System.err;
 		String date = daemonMain.logDateFormat.format(Calendar.getInstance().getTime());
-		
-		File logfile = new File(Configuration.configDir, "JMSDd-" + date + ".log");
+		File logDir = new File(Configuration.configDir, "logs");
+		if (!logDir.exists()) logDir.mkdir();
+		File logfile = new File(logDir, "JMSDd-" + date + ".log");
 		logfile.delete();
 		try {
 			logfile.createNewFile();
@@ -71,8 +72,9 @@ public class PrintStreamHandler {
 		logger.flush();
 		logger.close();
 		String date = daemonMain.logDateFormat.format(Calendar.getInstance().getTime());
-		
-		File logfile = new File(Configuration.configDir, "JMSDd-" + date + ".log");
+		File logDir = new File(Configuration.configDir, "logs");
+		if (!logDir.exists()) logDir.mkdir();
+		File logfile = new File(logDir, "JMSDd-" + date + ".log");;
 		logfile.delete();
 		try {
 			logfile.createNewFile();
