@@ -92,6 +92,7 @@ public class daemonMain {
 	private static int pid = 0;
 	static boolean runDog = true;
 	static Timer watchdoggy;
+	static int i = 1;
 	private static Boolean autoRestart;
 	private static ScheduledExecutorService service;
 	public static Scheduler quartzSched = null;
@@ -279,9 +280,10 @@ public class daemonMain {
 			int h = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartHour", 5);
 			int m = getDefault(getJSONObject(cfg, "processSettings"), "AutoRestartMinute", 0);
 
+			//Stop
 			String date = logDateFormat.format(Calendar.getInstance().getTime());
 			JobDetail job = JobBuilder.newJob(AutoRestartJob.class)  
-					.withIdentity("AutoRestartJob"+date, "AutoRestartJob")  
+					.withIdentity("AutoRestartJob"+date, "AutoRestartJob1")  
 					.build();
 			try {
 				if (quartzSched.checkExists(AutoRestartJobKey)) {
@@ -308,6 +310,71 @@ public class daemonMain {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			//Update
+			String date1 = logDateFormat.format(Calendar.getInstance().getTime());
+			JobDetail job1 = JobBuilder.newJob(AutoRestartJob.class)  
+					.withIdentity("AutoRestartJob"+date1, "AutoRestartJob2")  
+					.build();
+			try {
+				if (quartzSched.checkExists(AutoRestartJobKey)) {
+					quartzSched.deleteJob(AutoRestartJobKey);
+					quartzSched.triggerJob(AutoRestartJobKey);
+				}
+			}
+			catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			AutoRestartJobKey = job1.getKey();
+			// Schedule to run at 5 AM every day
+			ScheduleBuilder scheduleBuilder1 = 
+					CronScheduleBuilder.cronSchedule("0 " + m+5 + " " + h + " * * ?");
+			Trigger trigger1 = TriggerBuilder.newTrigger().
+					withSchedule(scheduleBuilder1).build();
+
+			try {
+				quartzSched.scheduleJob(job1, trigger1);
+			}
+			catch (SchedulerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//Start
+			String date11 = logDateFormat.format(Calendar.getInstance().getTime());
+			JobDetail job11 = JobBuilder.newJob(AutoRestartJob.class)  
+					.withIdentity("AutoRestartJob"+date11, "AutoRestartJob3")  
+					.build();
+			try {
+				if (quartzSched.checkExists(AutoRestartJobKey)) {
+					quartzSched.deleteJob(AutoRestartJobKey);
+					quartzSched.triggerJob(AutoRestartJobKey);
+				}
+			}
+			catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			AutoRestartJobKey = job11.getKey();
+			// Schedule to run at 5 AM every day
+			ScheduleBuilder scheduleBuilder11 = 
+					CronScheduleBuilder.cronSchedule("0 " + m+10 + " " + h + " * * ?");
+			Trigger trigger11 = TriggerBuilder.newTrigger().
+					withSchedule(scheduleBuilder11).build();
+
+			try {
+				quartzSched.scheduleJob(job11, trigger11);
+			}
+			catch (SchedulerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			
 		}
 
 	}
@@ -609,28 +676,35 @@ public class daemonMain {
 	}
 
 	public static void AutoRestart() {
-		try {
-			if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
-			while (ProcessRunning()) {
-				try {
-					Thread.sleep(1000L);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		
+		if (i == 1) {
+			try {
+				if (ProcessRunning()) eventBus.post(new ProcessShutdownEvent());
+				while (ProcessRunning()) {
+					try {
+						Thread.sleep(1000L);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
+			} catch (Exception e) {
 			}
-		} catch (Exception e) {
-
+			i = 2;
 		}
-		try {
-			eventBus.post(new ProcessPreRestartEvent());
-		} catch (Exception e) {
-
+		if (i == 2) {
+			try {
+				eventBus.post(new ProcessPreRestartEvent());
+			} catch (Exception e) {
+			}
+			i = 3;
 		}
-		try {
-			eventBus.post(new ProcessStartEvent());
-		} catch (Exception e) {
-
+		if (i == 3) {
+			try {
+				eventBus.post(new ProcessStartEvent());
+			} catch (Exception e) {
+			}
+			i = 1;
 		}
 
 	}
